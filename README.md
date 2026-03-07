@@ -62,12 +62,7 @@ Frontend runs on:
 ## Notes
 
 - The backend enables CORS for local development origins (port `3000`).
-- Make sure `static/uploads` and `static/processed` exist (the backend creates them on startup).
 
-## Screenshots / Demo
 
-Add screenshots or a short demo video here.
 
-## License
 
-Choose a license (e.g., MIT) and add it here if you plan to open-source the project.
