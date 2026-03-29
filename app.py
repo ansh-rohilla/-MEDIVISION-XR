@@ -3,6 +3,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from routes.upload import api_bp
 from routes.auth import auth_bp
+from routes.labels import labels_bp
 
 
 def create_app():
@@ -35,6 +36,7 @@ def create_app():
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api')
+    app.register_blueprint(labels_bp, url_prefix='/api')
 
     # Ensure SSL cert bundle is available for urllib downloads (e.g., torchvision weights)
     try:

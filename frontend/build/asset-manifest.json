@@ -1,0 +1,35 @@
+{
+  "files": {
+    "main.css": "/static/css/main.c56af00f.css",
+    "main.js": "/static/js/main.09fa1ab8.js",
+    "static/media/vtkVolumeFS.glsl": "/static/media/vtkVolumeFS.964483a4bb3a72f77e3f.glsl",
+    "static/media/vtkLineIntegralConvolution2D_SC.glsl": "/static/media/vtkLineIntegralConvolution2D_SC.2957a2e46d8939587314.glsl",
+    "static/media/vtkLineIntegralConvolution2D_LICI.glsl": "/static/media/vtkLineIntegralConvolution2D_LICI.7e42fafabb05f020d2ed.glsl",
+    "static/media/vtkSurfaceLICInterface_CE.glsl": "/static/media/vtkSurfaceLICInterface_CE.f13b55d53bd891f726e5.glsl",
+    "static/media/vtkLineIntegralConvolution2D_LIC0.glsl": "/static/media/vtkLineIntegralConvolution2D_LIC0.825208668e55577f254b.glsl",
+    "static/media/vtkStickMapperVS.glsl": "/static/media/vtkStickMapperVS.8864c36666601e6f6330.glsl",
+    "static/media/vtkLineIntegralConvolution2D_EE.glsl": "/static/media/vtkLineIntegralConvolution2D_EE.16060dfb3fc35b8bdffa.glsl",
+    "static/media/vtkPolyDataFS.glsl": "/static/media/vtkPolyDataFS.1104ea71ed8137e5f78d.glsl",
+    "static/media/vtkSphereMapperVS.glsl": "/static/media/vtkSphereMapperVS.3caa6ff84fef7c0b99e0.glsl",
+    "static/media/vtkLineIntegralConvolution2D_AAH.glsl": "/static/media/vtkLineIntegralConvolution2D_AAH.d6de9cf19a1fedecd33d.glsl",
+    "static/media/vtkLineIntegralConvolution2D_AAV.glsl": "/static/media/vtkLineIntegralConvolution2D_AAV.d70ff821f669e34e3275.glsl",
+    "static/media/vtkImageResliceMapperFS.glsl": "/static/media/vtkImageResliceMapperFS.b49b7b634ec5f9044862.glsl",
+    "static/media/vtkLineIntegralConvolution2D_CE.glsl": "/static/media/vtkLineIntegralConvolution2D_CE.0cc0f1effbe9b0df574e.glsl",
+    "static/media/vtkPolyData2DVS.glsl": "/static/media/vtkPolyData2DVS.fb790c44e98a4f72b1e2.glsl",
+    "static/media/vtkSurfaceLICInterface_DCpy.glsl": "/static/media/vtkSurfaceLICInterface_DCpy.8b2db3d8805aff4c5ed1.glsl",
+    "static/media/vtkPolyDataVS.glsl": "/static/media/vtkPolyDataVS.d2b1b7aeafb637138d4e.glsl",
+    "static/media/vtkLineIntegralConvolution2D_LICN.glsl": "/static/media/vtkLineIntegralConvolution2D_LICN.b2aea56a16b8a600427a.glsl",
+    "static/media/vtkImageResliceMapperVS.glsl": "/static/media/vtkImageResliceMapperVS.a4b301276a0937dfeee8.glsl",
+    "static/media/vtkVolumeVS.glsl": "/static/media/vtkVolumeVS.c00e21b62bcea1fbc1ff.glsl",
+    "static/media/vtkPolyData2DFS.glsl": "/static/media/vtkPolyData2DFS.4e4a3a19ba95c1212f0d.glsl",
+    "static/media/vtkLineIntegralConvolution2D_VT.glsl": "/static/media/vtkLineIntegralConvolution2D_VT.586e4b9fb27c7006ea26.glsl",
+    "static/media/vtkLineIntegralConvolution2D_quadVS.glsl": "/static/media/vtkLineIntegralConvolution2D_quadVS.2b51ba0c265ce975bfa1.glsl",
+    "index.html": "/index.html",
+    "main.c56af00f.css.map": "/static/css/main.c56af00f.css.map",
+    "main.09fa1ab8.js.map": "/static/js/main.09fa1ab8.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c56af00f.css",
+    "static/js/main.09fa1ab8.js"
+  ]
+}
