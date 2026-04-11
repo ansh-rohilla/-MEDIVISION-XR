@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { mockLabels } from './mockBackend';
 
 const OrganLabels = ({ bodyPart, containerRef, visible }) => {
   const [labels, setLabels] = useState([]);
@@ -54,16 +55,27 @@ const OrganLabels = ({ bodyPart, containerRef, visible }) => {
   console.log('🏷️ OrganLabels component called with props:', { bodyPart, visible, containerRef: !!containerRef });
 
   useEffect(() => {
-    console.log('🔄 OrganLabels useEffect triggered for bodyPart:', bodyPart);
+    console.log('Fetching labels for body part:', bodyPart);
+    
+    // Try to fetch from backend first
     fetch(`/api/labels/${bodyPart}`)
       .then(r => r.json())
       .then(data => {
-        console.log('📊 API response received:', data);
-        setLabels(data.labels || []);
+        console.log('API response received:', data);
+        if (data && data.labels && data.labels.length > 0) {
+          setLabels(data.labels);
+        } else {
+          // Fallback to mock data if backend returns empty
+          console.log('Backend returned empty, using mock data');
+          const mockData = mockLabels[bodyPart] || mockLabels.brain;
+          setLabels(mockData);
+        }
       })
       .catch(error => {
-        console.error('❌ API error:', error);
-        setLabels([]);
+        console.error('Error fetching labels, using mock data:', error);
+        // Use mock data as fallback
+        const mockData = mockLabels[bodyPart] || mockLabels.brain;
+        setLabels(mockData);
       });
   }, [bodyPart]);
 

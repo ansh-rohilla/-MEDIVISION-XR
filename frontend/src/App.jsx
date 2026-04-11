@@ -8,6 +8,7 @@ import LoadingSkeleton from './LoadingSkeleton';
 import ProgressBar from './ProgressBar';
 import LegendPanel from './LegendPanel';
 import ScanMetadata from './ScanMetadata';
+import { mockLabels } from './mockBackend';
 // IMPORTANT: Load rendering profile BEFORE importing vtk classes to register WebGL implementations
 import 'vtk.js/Sources/Rendering/Profiles/All';
 import vtkRenderWindow from 'vtk.js/Sources/Rendering/Core/RenderWindow';
@@ -22,7 +23,7 @@ import vtkVolume from 'vtk.js/Sources/Rendering/Core/Volume';
 import vtkVolumeMapper from 'vtk.js/Sources/Rendering/Core/VolumeMapper';
 
 function App() {
-  const BACKEND_ORIGIN = process.env.REACT_APP_BACKEND_ORIGIN || `${window.location.protocol}//localhost:5050`;
+  const BACKEND_ORIGIN = process.env.REACT_APP_BACKEND_ORIGIN || `${window.location.protocol}//localhost:5001`;
   const toBackendUrl = (u) => (u && u.startsWith('/')) ? `${BACKEND_ORIGIN}${u}` : u;
   const fmtError = (e) => {
     if (!e) return 'Unknown error';

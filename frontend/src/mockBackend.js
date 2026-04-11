@@ -1,0 +1,122 @@
+// Mock backend data for demonstration
+export const mockLabels = {
+  brain: [
+    {
+      name: 'Cerebrum',
+      x: 50,
+      y: 30,
+      side: 'center',
+      type: 'normal',
+      category: 'organs',
+      description: 'Largest part of brain responsible for higher functions'
+    },
+    {
+      name: 'Cerebellum',
+      x: 50,
+      y: 65,
+      side: 'center',
+      type: 'normal',
+      category: 'organs',
+      description: 'Coordinates movement and balance'
+    },
+    {
+      name: 'Brainstem',
+      x: 50,
+      y: 80,
+      side: 'center',
+      type: 'normal',
+      category: 'organs',
+      description: 'Controls vital functions like breathing and heart rate'
+    },
+    {
+      name: 'Frontal Lobe',
+      x: 35,
+      y: 25,
+      side: 'left',
+      type: 'normal',
+      category: 'organs',
+      description: 'Responsible for reasoning and motor control'
+    },
+    {
+      name: 'Parietal Lobe',
+      x: 65,
+      y: 25,
+      side: 'right',
+      type: 'normal',
+      category: 'organs',
+      description: 'Processes sensory information and spatial awareness'
+    },
+    {
+      name: 'Temporal Lobe',
+      x: 30,
+      y: 45,
+      side: 'left',
+      type: 'normal',
+      category: 'organs',
+      description: 'Processes auditory information and memory'
+    },
+    {
+      name: 'Occipital Lobe',
+      x: 70,
+      y: 45,
+      side: 'right',
+      type: 'normal',
+      category: 'organs',
+      description: 'Processes visual information'
+    },
+    {
+      name: 'Thalamus',
+      x: 50,
+      y: 50,
+      side: 'center',
+      type: 'normal',
+      category: 'organs',
+      description: 'Relays sensory and motor signals'
+    },
+    {
+      name: 'Hypothalamus',
+      x: 45,
+      y: 55,
+      side: 'left',
+      type: 'normal',
+      category: 'organs',
+      description: 'Regulates hormones and autonomic functions'
+    },
+    {
+      name: 'Pituitary Gland',
+      x: 55,
+      y: 55,
+      side: 'right',
+      type: 'normal',
+      category: 'organs',
+      description: 'Master gland controlling endocrine system'
+    },
+    {
+      name: 'Corpus Callosum',
+      x: 50,
+      y: 40,
+      side: 'center',
+      type: 'normal',
+      category: 'organs',
+      description: 'Connects left and right brain hemispheres'
+    },
+    {
+      name: 'Pons',
+      x: 48,
+      y: 70,
+      side: 'left',
+      type: 'normal',
+      category: 'organs',
+      description: 'Part of brainstem linking to cerebellum'
+    },
+    {
+      name: 'Medulla Oblongata',
+      x: 52,
+      y: 75,
+      side: 'right',
+      type: 'normal',
+      category: 'organs',
+      description: 'Controls vital autonomic functions'
+    }
+  ]
+};
