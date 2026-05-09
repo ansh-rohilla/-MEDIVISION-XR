@@ -5,6 +5,7 @@ import zipfile
 import uuid
 import shutil
 import subprocess
+import threading
 from flask import Blueprint, request, jsonify, current_app, session
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 import numpy as np
@@ -15,6 +16,71 @@ from pathlib import Path
 import json
 
 api_bp = Blueprint('api', __name__)
+
+# Store processing status
+processing_status = {}
+
+def process_upload_background(session_id, dicom_root, base_dir, static_dir, slices_dir, model_dir, volume_dir, snapshot_dir):
+    """Process upload in background thread"""
+    try:
+        processing_status[session_id] = {"status": "processing", "error": None}
+        
+        script_path = os.path.join(base_dir, 'CHEST', 'view_volume.py')
+        model_path = os.path.join(model_dir, 'model.glb')
+        vti_path = os.path.join(volume_dir, 'volume.vti')
+        snapshot_path = os.path.join(snapshot_dir, 'preview.png')
+
+        cmd = [sys.executable, script_path,
+               '--input', dicom_root,
+               '--out_slices', slices_dir,
+               '--out_model', model_path,
+               '--out_vti', vti_path,
+               '--snapshot_png', snapshot_path,
+               '--iso', 'auto',
+               '--vti_max_dim', '192']
+
+        completed = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        proc_stdout = (completed.stdout or '')
+        proc_stderr = (completed.stderr or '')
+        
+        # Build URLs
+        slice_files = []
+        for root, _, files_in in os.walk(slices_dir):
+            for name in sorted(files_in):
+                if name.lower().endswith('.png'):
+                    rel = os.path.relpath(os.path.join(root, name), static_dir)
+                    slice_files.append('/' + '/'.join(['static'] + rel.split(os.sep)))
+
+        model_rel = os.path.relpath(model_path, static_dir)
+        model_url = '/' + '/'.join(['static'] + model_rel.split(os.sep))
+        vti_rel = os.path.relpath(vti_path, static_dir)
+        volume_url = '/' + '/'.join(['static'] + vti_rel.split(os.sep))
+        snap_rel = os.path.relpath(snapshot_path, static_dir)
+        snapshot_url = '/' + '/'.join(['static'] + snap_rel.split(os.sep))
+
+        processing_status[session_id] = {
+            "status": "completed",
+            "slice_urls": slice_files,
+            "model_url": model_url,
+            "volume_url": volume_url,
+            "snapshot_url": snapshot_url,
+            "session_id": session_id,
+            "stdout": proc_stdout[-4000:],
+            "stderr": proc_stderr[-4000:]
+        }
+    except subprocess.CalledProcessError as e:
+        processing_status[session_id] = {
+            "status": "error",
+            "error": "Processing failed",
+            "details": (e.stderr or '')[-4000:],
+            "stdout": (e.stdout or '')[-4000:],
+            "stderr": (e.stderr or '')[-4000:]
+        }
+    except Exception as e:
+        processing_status[session_id] = {
+            "status": "error",
+            "error": str(e)
+        }
 
 def _serializer():
     return URLSafeTimedSerializer(current_app.config['SECRET_KEY'], salt='auth-token')
@@ -167,6 +233,21 @@ def upload():
         "stdout": proc_stdout[-4000:],
         "stderr": proc_stderr[-4000:]
     })
+
+
+@api_bp.route('/upload/status/<session_id>', methods=['GET'])
+def upload_status(session_id):
+    if not get_uid_from_request():
+        return jsonify({"error": "unauthenticated"}), 401
+    
+    print(f"Status check for session: {session_id}")
+    print(f"Available sessions: {list(processing_status.keys())}")
+    
+    status = processing_status.get(session_id)
+    if not status:
+        return jsonify({"error": "Session not found"}), 404
+    
+    return jsonify(status)
 
 
 @api_bp.route('/open_interactive', methods=['POST'])

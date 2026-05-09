@@ -1,10 +1,10 @@
 services:
   - type: web
     name: medivision-xr-backend
-    env: python
+    runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python deploy.py
+    buildCommand: pip install -r requirements.txt && pip install flask-cors
+    startCommand: python simple_backend.py
     envVars:
       - key: PORT
         value: 10000

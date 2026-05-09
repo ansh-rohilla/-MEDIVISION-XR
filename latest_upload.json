@@ -1,0 +1,18 @@
+{
+  "session_id": "548bbed0-4628-4652-a931-17f2d754561d",
+  "slice_urls": [
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0000.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0001.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0002.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0003.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0004.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0005.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0006.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0007.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0008.png",
+    "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/slices/slice_0009.png"
+  ],
+  "model_url": "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/model/model.glb",
+  "volume_url": "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/volume/volume.vti",
+  "snapshot_url": "/static/processed/548bbed0-4628-4652-a931-17f2d754561d/snapshot/preview.png"
+}

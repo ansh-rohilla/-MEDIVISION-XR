@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { mockLabels } from './mockBackend';
 
-const OrganLabels = ({ bodyPart, containerRef, visible }) => {
+const OrganLabels = ({ bodyPart, containerRef, visible, backendOrigin }) => {
   const [labels, setLabels] = useState([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [scanBounds, setScanBounds] = useState({ left: 0, top: 0, width: 0, height: 0 });
@@ -57,9 +57,12 @@ const OrganLabels = ({ bodyPart, containerRef, visible }) => {
   useEffect(() => {
     console.log('Fetching labels for body part:', bodyPart);
     
-    // Try to fetch from backend first
+    // Try to fetch from backend first (use proxy)
     fetch(`/api/labels/${bodyPart}`)
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error('Backend not accessible');
+        return r.json();
+      })
       .then(data => {
         console.log('API response received:', data);
         if (data && data.labels && data.labels.length > 0) {
@@ -67,23 +70,41 @@ const OrganLabels = ({ bodyPart, containerRef, visible }) => {
         } else {
           // Fallback to mock data if backend returns empty
           console.log('Backend returned empty, using mock data');
-          const mockData = mockLabels[bodyPart] || mockLabels.brain;
-          setLabels(mockData);
+          fetchMockData();
         }
       })
       .catch(error => {
         console.error('Error fetching labels, using mock data:', error);
         // Use mock data as fallback
-        const mockData = mockLabels[bodyPart] || mockLabels.brain;
-        setLabels(mockData);
+        fetchMockData();
       });
-  }, [bodyPart]);
+    
+    // Function to fetch mock data
+    function fetchMockData() {
+      fetch('/api/mock.json')
+        .then(r => r.json())
+        .then(mockData => {
+          const mockLabels = mockData[bodyPart] || mockData.brain;
+          setLabels(mockLabels.labels);
+        })
+        .catch(error => {
+          console.error('Error fetching mock data:', error);
+          // Final fallback to hardcoded data
+          const fallbackLabels = [
+            {name: "Cerebrum", x: 50, y: 30, side: "center", type: "normal", category: "organs", description: "Largest part of brain responsible for higher functions"},
+            {name: "Cerebellum", x: 50, y: 65, side: "center", type: "normal", category: "organs", description: "Coordinates movement and balance"},
+            {name: "Brainstem", x: 50, y: 80, side: "center", type: "normal", category: "organs", description: "Controls vital functions like breathing and heart rate"}
+          ];
+          setLabels(fallbackLabels);
+        });
+    }
+  }, [bodyPart, backendOrigin]);
 
   useEffect(() => {
     if (!containerRef?.current) return;
     const updateDims = () => {
       const rect = containerRef.current.getBoundingClientRect();
-      setDimensions({ width: rect.width, height: 600 }); // Fix container height
+      setDimensions({ width: rect.width, height: rect.height }); // Use actual container height
     };
     updateDims();
     const observer = new ResizeObserver(updateDims);
@@ -99,6 +120,79 @@ const OrganLabels = ({ bodyPart, containerRef, visible }) => {
   console.log('🔍 DEBUG - Container dimensions:', dimensions);
   console.log('🔍 DEBUG - Scan bounds:', scanBounds);
   console.log('🔍 DEBUG - Labels count:', labels.length);
+
+  // Function to detect and resolve label overlaps
+  const resolveOverlaps = (labelPositions) => {
+    const BOX_H = 32;
+    const HORIZONTAL_SPACING = 25;
+    const VERTICAL_SPACING = 70;
+    const resolvedPositions = [...labelPositions];
+    
+    // Sort by Y position for collision detection
+    resolvedPositions.sort((a, b) => a.boxY - b.boxY);
+    
+    // First, try to distribute labels evenly vertically if there are many
+    if (resolvedPositions.length > 3) {
+      const availableHeight = dimensions.height - 20; // 10px margin top and bottom
+      const totalRequiredHeight = resolvedPositions.length * (BOX_H + VERTICAL_SPACING);
+      
+      if (totalRequiredHeight > availableHeight) {
+        // Compress spacing to fit all labels
+        const compressedSpacing = (availableHeight - resolvedPositions.length * BOX_H) / (resolvedPositions.length - 1);
+        const startY = 10;
+        resolvedPositions.forEach((pos, idx) => {
+          pos.boxY = startY + idx * (BOX_H + compressedSpacing);
+        });
+      } else {
+        // Distribute evenly with full spacing
+        const startY = 10;
+        resolvedPositions.forEach((pos, idx) => {
+          pos.boxY = startY + idx * (BOX_H + VERTICAL_SPACING);
+        });
+      }
+    }
+    
+    // Then check for remaining collisions and resolve them
+    let hasOverlap = true;
+    let maxPasses = 20;
+    let pass = 0;
+    
+    while (hasOverlap && pass < maxPasses) {
+      hasOverlap = false;
+      pass++;
+      
+      for (let i = 0; i < resolvedPositions.length; i++) {
+        for (let j = i + 1; j < resolvedPositions.length; j++) {
+          const a = resolvedPositions[i];
+          const b = resolvedPositions[j];
+          
+          // Check if boxes overlap (both x and y)
+          const xOverlap = !(a.boxX + a.BOX_W + HORIZONTAL_SPACING < b.boxX ||
+                           b.boxX + b.BOX_W + HORIZONTAL_SPACING < a.boxX);
+          const yOverlap = !(a.boxY + a.BOX_H + VERTICAL_SPACING < b.boxY ||
+                           b.boxY + b.BOX_H + VERTICAL_SPACING < a.boxY);
+          
+          if (xOverlap && yOverlap) {
+            hasOverlap = true;
+            // Push both labels apart
+            const midY = (a.boxY + b.boxY) / 2;
+            const spacing = BOX_H + VERTICAL_SPACING;
+            
+            a.boxY = Math.max(10, midY - spacing / 2);
+            b.boxY = Math.min(dimensions.height - BOX_H - 10, midY + spacing / 2);
+          }
+        }
+      }
+    }
+    
+    // Final bounds check to ensure all labels are within container
+    resolvedPositions.forEach(pos => {
+      pos.boxX = Math.max(10, Math.min(pos.boxX, dimensions.width - pos.BOX_W - 10));
+      pos.boxY = Math.max(10, Math.min(pos.boxY, dimensions.height - pos.BOX_H - 10));
+    });
+    
+    return resolvedPositions;
+  };
 
   if (!visible || dimensions.width === 0 || scanBounds.width === 0) return null;
 
@@ -174,61 +268,78 @@ const OrganLabels = ({ bodyPart, containerRef, visible }) => {
         
         {/* Group with clipping applied */}
         <g clipPath="url(#viewer-clip)">
-        {sortedLabels.map((label, i) => {
-          // Calculate position within scan image area
-          const dotX = scanBounds.left + (label.x / 100) * scanBounds.width;
-          const dotY = scanBounds.top + (label.y / 100) * scanBounds.height;
-          console.log(`📍 Label ${i}: ${label.name} - Raw coords: x=${label.x}, y=${label.y}`);
-          console.log(`📏 Scan bounds: left=${scanBounds.left.toFixed(1)}, top=${scanBounds.top.toFixed(1)}, width=${scanBounds.width.toFixed(1)}, height=${scanBounds.height.toFixed(1)}`);
-          console.log(`🎯 Calculated dot: X=${dotX.toFixed(1)}, Y=${dotY.toFixed(1)}`);
-          
-          // Label box positioning with bounds checking
-          const isLeft = label.side === 'left';
-          const BOX_W = Math.max(90, label.name.length * 9 + 28);
-          const BOX_H = 32;
-          
-          let boxX = label.side === 'left' 
-            ? dotX - BOX_W - 35 
-            : dotX + 35;
-          let boxY = dotY - BOX_H / 2;
-          
-          // Clamp to scan image bounds with very strict margins
-          const margin = 30; // Very strict margin for safety
-          boxX = Math.max(scanBounds.left + margin, Math.min(boxX, scanBounds.left + scanBounds.width - BOX_W - margin));
-          boxY = Math.max(scanBounds.top + margin, Math.min(boxY, scanBounds.top + scanBounds.height - BOX_H - margin));
-          
-          // FINAL safety check - ensure labels don't go outside container at all
-          const containerWidth = dimensions.width;
-          const containerHeight = dimensions.height;
-          boxX = Math.max(10, Math.min(boxX, containerWidth - BOX_W - 10));
-          boxY = Math.max(10, Math.min(boxY, containerHeight - BOX_H - 10));
-          
-          console.log(`📦 FINAL Label box: X=${boxX.toFixed(1)}, Y=${boxY.toFixed(1)}, W=${BOX_W}, H=${BOX_H}`);
-          console.log(`📦 Container: ${containerWidth}x${containerHeight}, Scan bounds:`, scanBounds);
-          
-          const labelCenterX = boxX + BOX_W / 2;
-          const labelCenterY = boxY + BOX_H / 2;
-
-          // Enhanced color mapping
-          const getLabelColor = (type, category) => {
-            const colorMap = {
-              'airways': '#06B6D4', 'vascular': '#EF4444', 'lungs': '#10B981',
-              'bones': '#F59E0B', 'organs': '#8B5CF6', 'gi': '#F97316',
-              'tumor': '#EF4444'
+        {(() => {
+          // First pass: Calculate all label positions
+          const labelPositions = sortedLabels.map((label, i) => {
+            // Calculate position within scan image area
+            const dotX = scanBounds.left + (label.x / 100) * scanBounds.width;
+            const dotY = scanBounds.top + (label.y / 100) * scanBounds.height;
+            
+            // Label box positioning with bounds checking
+            const BOX_W = Math.max(90, label.name.length * 9 + 28);
+            const BOX_H = 32;
+            
+            let boxX = label.side === 'left' 
+              ? dotX - BOX_W - 35 
+              : dotX + 35;
+            let boxY = dotY - BOX_H / 2;
+            
+            // Clamp to scan image bounds with very strict margins
+            const margin = 30;
+            boxX = Math.max(scanBounds.left + margin, Math.min(boxX, scanBounds.left + scanBounds.width - BOX_W - margin));
+            boxY = Math.max(scanBounds.top + margin, Math.min(boxY, scanBounds.top + scanBounds.height - BOX_H - margin));
+            
+            // FINAL safety check - ensure labels don't go outside container at all
+            const containerWidth = dimensions.width;
+            const containerHeight = dimensions.height;
+            boxX = Math.max(10, Math.min(boxX, containerWidth - BOX_W - 10));
+            boxY = Math.max(10, Math.min(boxY, containerHeight - BOX_H - 10));
+            
+            return {
+              label,
+              dotX,
+              dotY,
+              boxX,
+              boxY,
+              BOX_W,
+              BOX_H,
+              index: i
             };
-            return colorMap[category] || colorMap[type] || '#F59E0B';
-          };
+          });
+          
+          // Resolve overlaps
+          const resolvedPositions = resolveOverlaps(labelPositions);
+          
+          // Render labels with resolved positions
+          return resolvedPositions.map(({ label, dotX, dotY, boxX, boxY, BOX_W, BOX_H, index: i }) => {
+            console.log(`� Label ${i}: ${label.name} - Raw coords: x=${label.x}, y=${label.y}`);
+            console.log(`📏 Scan bounds: left=${scanBounds.left.toFixed(1)}, top=${scanBounds.top.toFixed(1)}, width=${scanBounds.width.toFixed(1)}, height=${scanBounds.height.toFixed(1)}`);
+            console.log(`🎯 Calculated dot: X=${dotX.toFixed(1)}, Y=${dotY.toFixed(1)}`);
+            console.log(`📦 FINAL Label box: X=${boxX.toFixed(1)}, Y=${boxY.toFixed(1)}, W=${BOX_W}, H=${BOX_H}`);
+            
+            const labelCenterX = boxX + BOX_W / 2;
+            const labelCenterY = boxY + BOX_H / 2;
 
-          const color = getLabelColor(label.type, label.category);
-          const animationDelay = i * 100;
-          
-          console.log(`📍 Label ${i}: ${label.name} at scan coords (${dotX.toFixed(1)}, ${dotY.toFixed(1)})`);
-          
-          // Calculate bezier curve for connector
-          const lineEndX = label.side === 'left' ? boxX + BOX_W : boxX;
-          const lineEndY = labelCenterY;
-          const cpX = (dotX + lineEndX) / 2;
-          const cpY = Math.min(dotY, lineEndY) - 25;
+            // Enhanced color mapping
+            const getLabelColor = (type, category) => {
+              const colorMap = {
+                'airways': '#06B6D4', 'vascular': '#EF4444', 'lungs': '#10B981',
+                'bones': '#F59E0B', 'organs': '#8B5CF6', 'gi': '#F97316',
+                'tumor': '#EF4444'
+              };
+              return colorMap[category] || colorMap[type] || '#F59E0B';
+            };
+
+            const color = getLabelColor(label.type, label.category);
+            const animationDelay = i * 100;
+            
+            console.log(`📍 Label ${i}: ${label.name} at scan coords (${dotX.toFixed(1)}, ${dotY.toFixed(1)})`);
+            
+            // Calculate bezier curve for connector
+            const lineEndX = label.side === 'left' ? boxX + BOX_W : boxX;
+            const lineEndY = labelCenterY;
+            const cpX = (dotX + lineEndX) / 2;
+            const cpY = Math.min(dotY, lineEndY) - 25;
 
           return (
             <g key={i} style={{
@@ -328,7 +439,8 @@ const OrganLabels = ({ bodyPart, containerRef, visible }) => {
               </g>
             </g>
           );
-        })}
+        });
+        })()}
           </g> {/* Close clipping group */}
         </svg>
     </div>

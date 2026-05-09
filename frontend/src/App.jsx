@@ -8,7 +8,9 @@ import LoadingSkeleton from './LoadingSkeleton';
 import ProgressBar from './ProgressBar';
 import LegendPanel from './LegendPanel';
 import ScanMetadata from './ScanMetadata';
+import DiseaseClassification from './DiseaseClassification';
 import { mockLabels } from './mockBackend';
+import { api } from './api';
 // IMPORTANT: Load rendering profile BEFORE importing vtk classes to register WebGL implementations
 import 'vtk.js/Sources/Rendering/Profiles/All';
 import vtkRenderWindow from 'vtk.js/Sources/Rendering/Core/RenderWindow';
@@ -23,7 +25,7 @@ import vtkVolume from 'vtk.js/Sources/Rendering/Core/Volume';
 import vtkVolumeMapper from 'vtk.js/Sources/Rendering/Core/VolumeMapper';
 
 function App() {
-  const BACKEND_ORIGIN = process.env.REACT_APP_BACKEND_ORIGIN || `${window.location.protocol}//localhost:5001`;
+  const BACKEND_ORIGIN = process.env.REACT_APP_BACKEND_ORIGIN || 'http://localhost:5050';
   const toBackendUrl = (u) => (u && u.startsWith('/')) ? `${BACKEND_ORIGIN}${u}` : u;
   const fmtError = (e) => {
     if (!e) return 'Unknown error';
@@ -66,6 +68,7 @@ function App() {
     setActionMsg('Ready for new scan');
     setCurrentBodyPart('');
     setSnapshotUrl('');
+    setClassification(null);
   };
   const hasWebGL2 = useMemo(() => {
     try {
@@ -77,6 +80,8 @@ function App() {
     }
   }, []);
   const [sliceUrls, setSliceUrls] = useState([]);
+  const [bodyPart, setBodyPart] = useState('brain');
+  const [manualBodyPart, setManualBodyPart] = useState('');
   const [modelUrl, setModelUrl] = useState('');
   const [volumeUrl, setVolumeUrl] = useState('');
   const [showVolume, setShowVolume] = useState(false); // default to GLB for stability
@@ -108,6 +113,7 @@ function App() {
   const [volReady, setVolReady] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [currentBodyPart, setCurrentBodyPart] = useState('');
+  const [classification, setClassification] = useState(null);
   const vtkContainerRef = useRef(null);
   const overlayContainerRef = useRef(null);
   const viewer3dRef = useRef(null);
@@ -126,7 +132,41 @@ function App() {
   const apiFetch = (url, opts = {}) => {
     const hdrs = { ...(opts.headers || {}) };
     if (token) hdrs['Authorization'] = `Bearer ${token}`;
-    return fetch(url, { credentials: 'include', ...opts, headers: hdrs });
+    const fullUrl = url.startsWith('http') ? url : `${BACKEND_ORIGIN}${url}`;
+    return fetch(fullUrl, { credentials: 'include', ...opts, headers: hdrs });
+  };
+
+  const loadWorkingData = () => {
+    // Load the latest successful upload session
+    const workingData = {
+      session_id: '3cb8fa29-0eed-4616-a3bf-75771bf476b1',
+      slice_urls: [
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0000.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0001.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0002.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0003.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0004.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0005.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0006.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0007.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0008.png",
+        "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/slices/slice_0009.png"
+      ],
+      model_url: "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/model/model.glb",
+      volume_url: "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/volume/volume.vti",
+      snapshot_url: "/static/processed/3cb8fa29-0eed-4616-a3bf-75771bf476b1/snapshot/preview.png"
+    };
+    
+    setSessionId(workingData.session_id);
+    setSliceUrls(workingData.slice_urls);
+    setModelUrl(workingData.model_url);
+    setVolumeUrl(workingData.volume_url);
+    setSnapshotUrl(workingData.snapshot_url);
+    setShowLabels(false);
+    setShowVolume(true); // Show volume since 3D model is available
+    setActionMsg('Sample data loaded (10 slices with 3D model)');
+    setError('');
+    setIdx(0);
   };
 
   useEffect(() => {
@@ -135,12 +175,27 @@ function App() {
         const resp = await apiFetch('/api/auth/me');
         if (resp.ok) {
           const j = await resp.json();
-          setUser(j.user);
+          if (j.user) {
+            setUser(j.user);
+            setAuthOpen(false);
+          } else {
+            setUser(null);
+            setAuthOpen(true);
+          }
         } else {
-          if (token) { localStorage.removeItem('auth_token'); setToken(''); }
+          // Clear invalid token and show auth modal
+          if (token) { 
+            localStorage.removeItem('auth_token'); 
+            setToken(''); 
+          }
+          setUser(null);
           setAuthOpen(true);
         }
-      } catch {}
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        setUser(null);
+        setAuthOpen(true);
+      }
     })();
   }, []);
 
@@ -362,11 +417,11 @@ function App() {
     const bodyPartKeywords = {
       'abdomen': ['abdomen', 'abdominal'],
       'upperabdomen': ['upperabdomen', 'upper abdomen'],
-      'chest': ['chest', 'thorax', 'lung'],
+      'chest': ['chest', 'thorax', 'lung', 'lungs', 'pulmonary', 'chest-ct', 'chestct', 'ct-chest', 'cancer', 'tumor', 'lesion'],
       'humanneck': ['neck', 'cervical'],
-      'brain': ['brain', 'head', 'skull', 'cerebral', 'cranial', 'mri', 'ct', 'neuro', 'axial', 'sagittal', 'coronal'],
+      'brain': ['brain', 'head', 'skull', 'cerebral', 'cranial', 'neuro', 'axial', 'sagittal', 'coronal'],
       'fullbody': ['fullbody', 'full body', 'whole body'],
-      'tumor': ['tumor', 'lesion', 'cancer']
+      'tumor': ['tumor', 'lesion']
     };
 
     const allPaths = Array.from(fileList).map(f => 
@@ -390,68 +445,108 @@ function App() {
   };
 
   const uploadFiles = async (fileList) => {
+    console.log('=== UPLOAD DEBUG START ===');
+    console.log('1. fileList received:', fileList);
+    console.log('2. fileList length:', fileList.length);
+    console.log('3. BACKEND_ORIGIN:', BACKEND_ORIGIN);
+    console.log('4. token present:', !!token);
+    console.log('4.1. current token value:', token);
+    
+    // Use manual body part if selected, otherwise auto-detect
+    const detectedBodyPart = manualBodyPart || detectBodyPart(fileList);
+    console.log('4.2. Body part:', detectedBodyPart, '(manual:', manualBodyPart, ')');
+    setBodyPart(detectedBodyPart);
+    
     setLoading(true);
     setError('');
     try {
-      const form = new FormData();
-      // Send as 'files', preserving relative path if available
-      Array.from(fileList).forEach((f) => {
-        const rel = f.webkitRelativePath && f.webkitRelativePath.length > 0 ? f.webkitRelativePath : f.name;
-        form.append('files', f, rel);
-      });
-
-      const resp = await apiFetch('/api/upload', { method: 'POST', body: form });
-      if (!resp.ok) {
-        const txt = await resp.text();
-        try {
-          const j = JSON.parse(txt);
-          const msg = j.error || j.details || fmtError(j);
-          setError(msg);
-          if ((j.error || '').includes('unauthenticated')) setAuthOpen(true);
-          return;
-        } catch {
-          throw new Error(txt);
-        }
-      }
-      const data = await resp.json();
-      const mappedSlices = (data.slice_urls || []).map(toBackendUrl);
-      const stamp = Date.now();
-      const model = data.model_url ? `${toBackendUrl(data.model_url)}?t=${stamp}` : '';
-      const vti = data.volume_url ? `${toBackendUrl(data.volume_url)}?t=${stamp}` : '';
-      const snap = data.snapshot_url ? `${toBackendUrl(data.snapshot_url)}?t=${stamp}` : '';
-      setSliceUrls(mappedSlices);
-      setModelUrl(model);
-      setVolumeUrl(vti);
-      setSnapshotUrl(snap);
-      setSessionId(data.session_id || '');
-      setIdx(0);
-      // Default to GLB; user can enable Volume with the toggle
-      setShowVolume(false);
+      // Use the new API module for upload
+      console.log('5. Calling api.uploadFiles...');
+      const result = await api.uploadFiles(Array.from(fileList));
+      console.log('6. API result received:', result);
       
-      // Detect body part from file paths
-      const detectedBodyPart = detectBodyPart(fileList);
-      console.log('🎯 Setting body part:', detectedBodyPart);
-      setCurrentBodyPart(detectedBodyPart);
-      setShowLabels(false); // Reset labels when new upload
+      if (result.slice_urls || result.model_url || result.volume_url) {
+        console.log('7. Upload successful - updating state');
+        // Backend successfully processed the files
+        setSessionId(result.session_id);
+        setSliceUrls(result.slice_urls || []);
+        setModelUrl(result.model_url || '');
+        setVolumeUrl(result.volume_url || '');
+        setSnapshotUrl(result.snapshot_url || '');
+        setCurrentBodyPart(detectedBodyPart); // Update current body part for labels
+        setShowLabels(false); // Reset labels when new upload
+        setActionMsg('Files uploaded successfully');
+        console.log('8. State updated successfully');
+        
+        // Run disease classification
+        try {
+          console.log('9. Running disease classification...');
+          const classificationResult = await api.classifyScan(result.session_id, detectedBodyPart);
+          console.log('10. Classification result:', classificationResult);
+          setClassification(classificationResult.classification);
+        } catch (e) {
+          console.error('Classification failed:', e);
+          setClassification(null);
+        }
+      } else {
+        console.log('7. Upload failed - no processed files');
+        throw new Error(result.error || 'Upload failed - no processed files returned');
+      }
     } catch (e) {
-      setError(fmtError(e) || 'Upload failed');
+      console.log('9. Upload error caught:', e);
+      console.log('10. Error details:', {
+        message: e.message,
+        stack: e.stack,
+        name: e.name
+      });
+      // Show full error message including backend details
+      let errorMsg = fmtError(e) || 'Upload failed';
+      if (e.message && e.message.includes('details:')) {
+        errorMsg = e.message;
+      }
+      setError(errorMsg);
     } finally {
+      console.log('11. Setting loading to false');
       setLoading(false);
+      console.log('=== UPLOAD DEBUG END ===');
     }
   };
 
   const onFolderChange = (e) => {
+    console.log('=== FOLDER CHANGE DEBUG START ===');
+    console.log('1. Folder change event triggered');
+    console.log('2. e.target:', e.target);
     const files = e.target.files;
+    console.log('3. files from event:', files);
+    console.log('4. files length:', files ? files.length : 0);
     if (files && files.length) {
+      console.log('5. Files found, calling uploadFiles');
+      console.log('6. File details:', Array.from(files).map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        webkitRelativePath: f.webkitRelativePath
+      })));
       uploadFiles(files);
+    } else {
+      console.log('5. No files found');
     }
+    console.log('=== FOLDER CHANGE DEBUG END ===');
   };
 
   const onZipChange = (e) => {
-    const files = e.target.files;
+    const files = Array.from(e.target.files);
     if (files && files.length) {
+      console.log('ZIP file selected:', files.length);
+      console.log('File details:', files.map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type
+      })));
       // Send the ZIP as a single file
       uploadFiles(files);
+    } else {
+      setError('No ZIP file selected');
     }
   };
 
@@ -569,13 +664,47 @@ function App() {
           <div className="flex items-center gap-3">
             {user && (
               <>
-                <label className="inline-flex items-center gap-2 px-3 py-2 border border-neutral-700 rounded cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-neutral-100">
+                <select 
+                  className="px-3 py-2 border border-neutral-700 rounded bg-neutral-800 text-neutral-100"
+                  value={manualBodyPart}
+                  onChange={(e) => setManualBodyPart(e.target.value)}
+                >
+                  <option value="">Auto-detect Body Part</option>
+                  <option value="brain">Brain</option>
+                  <option value="chest">Chest</option>
+                  <option value="abdomen">Abdomen</option>
+                  <option value="upperabdomen">Upper Abdomen</option>
+                  <option value="humanneck">Neck</option>
+                  <option value="fullbody">Full Body</option>
+                </select>
+                <label className="inline-flex items-center gap-2 px-3 py-2 border border-neutral-700 rounded cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-neutral-100" title="Upload DICOM files in ZIP format">
                   <span>Upload ZIP</span>
                   <input type="file" accept=".zip" className="hidden" onChange={onZipChange} />
                 </label>
-                <label className="inline-flex items-center gap-2 px-3 py-2 border border-neutral-700 rounded cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-neutral-100">
+                <label className="inline-flex items-center gap-2 px-3 py-2 border border-neutral-700 rounded cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-neutral-100" title="Upload DICOM folder">
                   <span>Upload Folder</span>
-                  <input type="file" multiple webkitdirectory="" directory="" className="hidden" onChange={onFolderChange} />
+                  <input 
+                    type="file" 
+                    webkitdirectory="" 
+                    directory=""
+                    multiple 
+                    className="hidden" 
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files);
+                      console.log('Folder files selected:', files.length);
+                      console.log('Files details:', files.map(f => ({
+                        name: f.name,
+                        size: f.size,
+                        type: f.type,
+                        webkitRelativePath: f.webkitRelativePath
+                      })));
+                      if (files.length > 0) {
+                        uploadFiles(files);
+                      } else {
+                        setError('No files selected from folder');
+                      }
+                    }} 
+                  />
                 </label>
                 <button
                   className="px-3 py-2 border border-neutral-700 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-100"
@@ -687,6 +816,10 @@ function App() {
           <div className="mb-2 p-3 rounded border border-red-800 bg-red-950 text-red-200 whitespace-pre-wrap">{error}</div>
         )}
 
+        {classification && (
+          <DiseaseClassification classification={classification} visible={true} />
+        )}
+        
         {activeTab === 'viewer' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <section className="bg-neutral-900 border border-neutral-800 rounded p-4 flex flex-col">
@@ -742,6 +875,7 @@ function App() {
                 bodyPart={currentBodyPart}
                 containerRef={viewer3dRef}
                 visible={showLabels}
+                backendOrigin={BACKEND_ORIGIN}
               />
             </div>
             

@@ -4,6 +4,7 @@ from flask_cors import CORS
 from routes.upload import api_bp
 from routes.auth import auth_bp
 from routes.labels import labels_bp
+from routes.classification import classification_bp
 
 
 def create_app():
@@ -18,16 +19,13 @@ def create_app():
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     # In dev, do not force Secure; in prod behind HTTPS set this to True
     app.config['SESSION_COOKIE_SECURE'] = False
+    # Increase max content length for large ZIP files (500MB)
+    app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
     CORS(
         app,
         resources={
             r"/api/*": {
-                "origins": [
-                    "http://localhost:3000",
-                    "http://127.0.0.1:3000",
-                    r"http://localhost:\d+",
-                    r"http://127\.0\.0\.1:\d+",
-                ]
+                "origins": "*"
             },
             r"/static/*": {"origins": "*"},
         },
@@ -37,6 +35,7 @@ def create_app():
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(labels_bp, url_prefix='/api')
+    app.register_blueprint(classification_bp, url_prefix='/api')
 
     # Ensure SSL cert bundle is available for urllib downloads (e.g., torchvision weights)
     try:
@@ -69,4 +68,4 @@ app = create_app()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', '5050'))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=True, threaded=True)

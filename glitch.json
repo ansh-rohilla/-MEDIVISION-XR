@@ -1,15 +1,15 @@
 {
   "name": "medivision-xr-backend",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "MEDIVISION-XR Backend API",
-  "main": "simple_backend.py",
+  "main": "public_backend.py",
   "scripts": {
-    "start": "python simple_backend.py"
+    "start": "python public_backend.py"
   },
   "dependencies": {
-    "python": "^3.9.0"
+    "express": "^4.18.2"
   },
   "engines": {
-    "python": "3.9.x"
+    "node": "14.x"
   }
 }
