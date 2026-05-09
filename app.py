@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from routes.upload import api_bp
 from routes.auth import auth_bp
@@ -56,6 +56,29 @@ def create_app():
             '<p>Health check: <a href="/api/health">/api/health</a></p>'
             '</body></html>'
         )
+
+    # Serve React frontend in production
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def serve_frontend(path):
+        # Check if we're in production and React build exists
+        build_dir = os.path.join(static_dir, 'build')
+        if os.path.exists(build_dir):
+            if path != "" and os.path.exists(os.path.join(build_dir, path)):
+                return send_from_directory(build_dir, path)
+            else:
+                return send_from_directory(build_dir, 'index.html')
+        else:
+            # Development mode - redirect to localhost:3000
+            return (
+                '<html><head><title>Medivision XR</title></head>'
+                '<body style="font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding:24px">'
+                '<h1>Medivision XR - Development Mode</h1>'
+                '<p>Backend is running on port 5050.</p>'
+                '<p>Frontend is running on <a href="http://localhost:3000">http://localhost:3000</a>.</p>'
+                '<p>Health check: <a href="/api/health">/api/health</a></p>'
+                '</body></html>'
+            )
 
     @app.get('/api/health')
     def health():

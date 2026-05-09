@@ -1,0 +1,22 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[[services]]
+name = "medivision-xr"
+
+[services.variables]
+PORT = "5050"
+NODE_ENV = "production"
+
+[[services.ports]]
+port = 5050
+handlers = ["http"]
+
+[services.ports.envVars]
+PRODUCTION = "true"
