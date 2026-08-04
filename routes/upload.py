@@ -17,14 +17,82 @@ import json
 
 api_bp = Blueprint('api', __name__)
 
-# Store processing status
+# Store processing status (also persisted per session on disk)
 processing_status = {}
+
+
+def _status_path(processed_root):
+    return os.path.join(processed_root, 'status.json')
+
+
+def _sanitize_status_payload(payload):
+    """Remove control characters that break JSON parsers in browsers."""
+    clean = {}
+    for key, value in payload.items():
+        if isinstance(value, str):
+            clean[key] = ''.join(ch if ch == '\n' or ch == '\t' or ord(ch) >= 32 else ' ' for ch in value)
+        else:
+            clean[key] = value
+    return clean
+
+
+def _save_session_status(processed_root, payload):
+    os.makedirs(processed_root, exist_ok=True)
+    with open(_status_path(processed_root), 'w', encoding='utf-8') as fh:
+        json.dump(_sanitize_status_payload(payload), fh)
+
+
+def _load_session_status(processed_root):
+    path = _status_path(processed_root)
+    if not os.path.isfile(path):
+        return None
+    try:
+        with open(path, 'r', encoding='utf-8') as fh:
+            return json.load(fh)
+    except Exception:
+        return None
+
+
+def _set_processing_status(session_id, processed_root, payload):
+    processing_status[session_id] = payload
+    _save_session_status(processed_root, payload)
+
+
+def _build_result_urls(static_dir, session_id, slices_dir, model_path, vti_path, snapshot_path):
+    slice_files = []
+    for root, _, files_in in os.walk(slices_dir):
+        for name in sorted(files_in):
+            if name.lower().endswith('.png'):
+                rel = os.path.relpath(os.path.join(root, name), static_dir)
+                slice_files.append('/' + '/'.join(['static'] + rel.split(os.sep)))
+
+    result = {
+        "slice_urls": slice_files,
+        "session_id": session_id,
+    }
+    if os.path.isfile(model_path):
+        model_rel = os.path.relpath(model_path, static_dir)
+        result["model_url"] = '/' + '/'.join(['static'] + model_rel.split(os.sep))
+    if os.path.isfile(vti_path):
+        vti_rel = os.path.relpath(vti_path, static_dir)
+        result["volume_url"] = '/' + '/'.join(['static'] + vti_rel.split(os.sep))
+    if os.path.isfile(snapshot_path):
+        snap_rel = os.path.relpath(snapshot_path, static_dir)
+        result["snapshot_url"] = '/' + '/'.join(['static'] + snap_rel.split(os.sep))
+    return result
+
 
 def process_upload_background(session_id, dicom_root, base_dir, static_dir, slices_dir, model_dir, volume_dir, snapshot_dir):
     """Process upload in background thread"""
+    processed_root = os.path.dirname(slices_dir)
     try:
-        processing_status[session_id] = {"status": "processing", "error": None}
-        
+        _set_processing_status(session_id, processed_root, {
+            "status": "processing",
+            "stage": "Reading DICOM and building volume",
+            "session_id": session_id,
+            "error": None,
+        })
+
         script_path = os.path.join(base_dir, 'CHEST', 'view_volume.py')
         model_path = os.path.join(model_dir, 'model.glb')
         vti_path = os.path.join(volume_dir, 'volume.vti')
@@ -33,54 +101,46 @@ def process_upload_background(session_id, dicom_root, base_dir, static_dir, slic
         cmd = [sys.executable, script_path,
                '--input', dicom_root,
                '--out_slices', slices_dir,
-               '--out_model', model_path,
                '--out_vti', vti_path,
                '--snapshot_png', snapshot_path,
+               '--skip-model',
                '--iso', 'auto',
                '--vti_max_dim', '192']
 
-        completed = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        _set_processing_status(session_id, processed_root, {
+            "status": "processing",
+            "stage": "Generating slices and 3D preview",
+            "session_id": session_id,
+            "error": None,
+        })
+        completed = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         proc_stdout = (completed.stdout or '')
         proc_stderr = (completed.stderr or '')
-        
-        # Build URLs
-        slice_files = []
-        for root, _, files_in in os.walk(slices_dir):
-            for name in sorted(files_in):
-                if name.lower().endswith('.png'):
-                    rel = os.path.relpath(os.path.join(root, name), static_dir)
-                    slice_files.append('/' + '/'.join(['static'] + rel.split(os.sep)))
 
-        model_rel = os.path.relpath(model_path, static_dir)
-        model_url = '/' + '/'.join(['static'] + model_rel.split(os.sep))
-        vti_rel = os.path.relpath(vti_path, static_dir)
-        volume_url = '/' + '/'.join(['static'] + vti_rel.split(os.sep))
-        snap_rel = os.path.relpath(snapshot_path, static_dir)
-        snapshot_url = '/' + '/'.join(['static'] + snap_rel.split(os.sep))
+        result = _build_result_urls(
+            static_dir, session_id, slices_dir, model_path, vti_path, snapshot_path
+        )
+        if result.get("slice_urls"):
+            _set_processing_status(session_id, processed_root, {
+                "status": "completed",
+                **result,
+                "stdout": proc_stdout[-4000:],
+                "stderr": proc_stderr[-4000:],
+            })
+            return
 
-        processing_status[session_id] = {
-            "status": "completed",
-            "slice_urls": slice_files,
-            "model_url": model_url,
-            "volume_url": volume_url,
-            "snapshot_url": snapshot_url,
-            "session_id": session_id,
-            "stdout": proc_stdout[-4000:],
-            "stderr": proc_stderr[-4000:]
-        }
-    except subprocess.CalledProcessError as e:
-        processing_status[session_id] = {
+        if completed.returncode != 0:
+            details = proc_stderr or proc_stdout or f"exit code {completed.returncode}"
+            raise RuntimeError(details.strip()[-4000:])
+
+        raise RuntimeError("Processing finished but no slice images were produced")
+    except Exception as e:
+        _set_processing_status(session_id, processed_root, {
             "status": "error",
             "error": "Processing failed",
-            "details": (e.stderr or '')[-4000:],
-            "stdout": (e.stdout or '')[-4000:],
-            "stderr": (e.stderr or '')[-4000:]
-        }
-    except Exception as e:
-        processing_status[session_id] = {
-            "status": "error",
-            "error": str(e)
-        }
+            "details": str(e),
+            "session_id": session_id,
+        })
 
 def _serializer():
     return URLSafeTimedSerializer(current_app.config['SECRET_KEY'], salt='auth-token')
@@ -182,57 +242,37 @@ def upload():
         save_uploads_to_folder(files, uploads_root)
         dicom_root = uploads_root
 
-    # Call view_volume.py to generate slices and GLB
-    script_path = os.path.join(base_dir, 'CHEST', 'view_volume.py')
     model_path = os.path.join(model_dir, 'model.glb')
     vti_path = os.path.join(volume_dir, 'volume.vti')
     snapshot_path = os.path.join(snapshot_dir, 'preview.png')
 
-    cmd = [sys.executable, script_path,
-           '--input', dicom_root,
-           '--out_slices', slices_dir,
-           '--out_model', model_path,
-           '--out_vti', vti_path,
-           '--snapshot_png', snapshot_path,
-           '--iso', 'auto',
-           '--vti_max_dim', '192']
-
-    try:
-        completed = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-        proc_stdout = (completed.stdout or '')
-        proc_stderr = (completed.stderr or '')
-    except subprocess.CalledProcessError as e:
-        return jsonify({
-            "error": "Processing failed",
-            "details": (e.stderr or '')[-4000:],
-            "stdout": (e.stdout or '')[-4000:],
-            "stderr": (e.stderr or '')[-4000:]
-        }), 500
-
-    # Build URLs
-    slice_files = []
-    for root, _, files_in in os.walk(slices_dir):
-        for name in sorted(files_in):
-            if name.lower().endswith('.png'):
-                rel = os.path.relpath(os.path.join(root, name), static_dir)
-                slice_files.append('/' + '/'.join(['static'] + rel.split(os.sep)))
-
-    model_rel = os.path.relpath(model_path, static_dir)
-    model_url = '/' + '/'.join(['static'] + model_rel.split(os.sep))
-    vti_rel = os.path.relpath(vti_path, static_dir)
-    volume_url = '/' + '/'.join(['static'] + vti_rel.split(os.sep))
-    snap_rel = os.path.relpath(snapshot_path, static_dir)
-    snapshot_url = '/' + '/'.join(['static'] + snap_rel.split(os.sep))
+    _set_processing_status(session_id, processed_root, {
+        "status": "processing",
+        "stage": "Upload received",
+        "session_id": session_id,
+        "error": None,
+    })
+    thread = threading.Thread(
+        target=process_upload_background,
+        args=(
+            session_id,
+            dicom_root,
+            base_dir,
+            static_dir,
+            slices_dir,
+            model_dir,
+            volume_dir,
+            snapshot_dir,
+        ),
+        daemon=True,
+    )
+    thread.start()
 
     return jsonify({
-        "slice_urls": slice_files,
-        "model_url": model_url,
-        "volume_url": volume_url,
-        "snapshot_url": snapshot_url,
+        "status": "processing",
         "session_id": session_id,
-        "stdout": proc_stdout[-4000:],
-        "stderr": proc_stderr[-4000:]
-    })
+        "message": "Upload received; processing in background",
+    }), 202
 
 
 @api_bp.route('/upload/status/<session_id>', methods=['GET'])
@@ -243,11 +283,26 @@ def upload_status(session_id):
     print(f"Status check for session: {session_id}")
     print(f"Available sessions: {list(processing_status.keys())}")
     
-    status = processing_status.get(session_id)
-    if not status:
-        return jsonify({"error": "Session not found"}), 404
-    
-    return jsonify(status)
+    processed_root = os.path.join(current_app.static_folder, 'processed', session_id)
+    status = processing_status.get(session_id) or _load_session_status(processed_root)
+    if status:
+        return jsonify(status)
+
+    # Older sessions without status.json — reconstruct from output files
+    if os.path.isdir(processed_root):
+        static_dir = current_app.static_folder
+        result = _build_result_urls(
+            static_dir,
+            session_id,
+            os.path.join(processed_root, 'slices'),
+            os.path.join(processed_root, 'model', 'model.glb'),
+            os.path.join(processed_root, 'volume', 'volume.vti'),
+            os.path.join(processed_root, 'snapshot', 'preview.png'),
+        )
+        if result.get("slice_urls"):
+            return jsonify({"status": "completed", **result})
+
+    return jsonify({"error": "Session not found"}), 404
 
 
 @api_bp.route('/open_interactive', methods=['POST'])

@@ -1,9 +1,14 @@
+import hashlib
+import hmac
 import os
 import sqlite3
 import time
 from flask import Blueprint, request, jsonify, session, current_app
 from itsdangerous import URLSafeTimedSerializer
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
+
+# Werkzeug 3.x defaults to scrypt, but hashlib.scrypt is missing on some macOS/Python builds.
+PASSWORD_HASH_METHOD = 'pbkdf2:sha256'
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -45,6 +50,45 @@ def get_serializer():
     return URLSafeTimedSerializer(current_app.config['SECRET_KEY'], salt='auth-token')
 
 
+def hash_password(password: str) -> str:
+    return generate_password_hash(password, method=PASSWORD_HASH_METHOD)
+
+
+def _scrypt_hex(password: str, salt: str, method: str) -> str:
+    """Compute scrypt digest when hashlib.scrypt is unavailable."""
+    method_name, *args = method.split(':')
+    if method_name != 'scrypt':
+        raise ValueError(f'expected scrypt method, got {method_name!r}')
+    if not args:
+        n, r, p = 2**15, 8, 1
+    else:
+        n, r, p = map(int, args)
+    password_bytes = password.encode()
+    salt_bytes = salt.encode()
+    if hasattr(hashlib, 'scrypt'):
+        maxmem = 132 * n * r * p
+        return hashlib.scrypt(
+            password_bytes, salt=salt_bytes, n=n, r=r, p=p, maxmem=maxmem
+        ).hex()
+    import scrypt as scrypt_lib
+
+    return scrypt_lib.hash(password_bytes, salt_bytes, N=n, r=r, p=p).hex()
+
+
+def verify_password(password_hash: str, password: str) -> bool:
+    try:
+        method, salt, hashval = password_hash.split('$', 2)
+    except ValueError:
+        return False
+    if method.startswith('scrypt:') and not hasattr(hashlib, 'scrypt'):
+        try:
+            computed = _scrypt_hex(password, salt, method)
+        except Exception:
+            return False
+        return hmac.compare_digest(computed, hashval)
+    return check_password_hash(password_hash, password)
+
+
 def uid_from_request():
     uid = session.get('user_id')
     if uid:
@@ -67,7 +111,7 @@ def register():
     name = (data.get('name') or '').strip()
     if not email or not password:
         return jsonify({"error": "email and password required"}), 400
-    pw_hash = generate_password_hash(password)
+    pw_hash = hash_password(password)
     try:
         with get_db() as db:
             cur = db.execute(
@@ -94,9 +138,14 @@ def login():
     with get_db() as db:
         cur = db.execute('SELECT id, email, name, password_hash FROM users WHERE email=?', (email,))
         row = cur.fetchone()
-        if not row or not check_password_hash(row['password_hash'], password):
+        if not row or not verify_password(row['password_hash'], password):
             return jsonify({"error": "invalid credentials"}), 401
         session['user_id'] = row['id']
+        if row['password_hash'].startswith('scrypt:'):
+            db.execute(
+                'UPDATE users SET password_hash=? WHERE id=?',
+                (hash_password(password), row['id']),
+            )
         token = get_serializer().dumps({"uid": row['id']})
         return jsonify({"user": {"id": row['id'], "email": row['email'], "name": row['name']}, "token": token})
 

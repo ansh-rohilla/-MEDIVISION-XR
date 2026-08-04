@@ -10,7 +10,7 @@ import LegendPanel from './LegendPanel';
 import ScanMetadata from './ScanMetadata';
 import DiseaseClassification from './DiseaseClassification';
 import { mockLabels } from './mockBackend';
-import { api } from './api';
+import { api, pollUploadStatus } from './api';
 // IMPORTANT: Load rendering profile BEFORE importing vtk classes to register WebGL implementations
 import 'vtk.js/Sources/Rendering/Profiles/All';
 import vtkRenderWindow from 'vtk.js/Sources/Rendering/Core/RenderWindow';
@@ -47,6 +47,13 @@ function App() {
       const txt = await resp.text();
       let data; try { data = JSON.parse(txt); } catch { throw new Error(txt); }
       if (!resp.ok) throw new Error(data.error || 'Evaluation failed');
+      const torchMissing = !data.dependencies?.torch;
+      const twoDReady = typeof data.two_d?.mean_top1_confidence === 'number';
+      const threeDReady = typeof data.three_d?.top1_confidence === 'number';
+      if (torchMissing || (!twoDReady && !threeDReady)) {
+        const note = data.two_d?.notes || data.three_d?.notes || 'PyTorch is not available on the server.';
+        throw new Error(note);
+      }
       setEvalRes(data);
     } catch (e) {
       setError(fmtError(e));
@@ -158,10 +165,10 @@ function App() {
     };
     
     setSessionId(workingData.session_id);
-    setSliceUrls(workingData.slice_urls);
-    setModelUrl(workingData.model_url);
-    setVolumeUrl(workingData.volume_url);
-    setSnapshotUrl(workingData.snapshot_url);
+    setSliceUrls(workingData.slice_urls.map(toBackendUrl));
+    setModelUrl(toBackendUrl(workingData.model_url));
+    setVolumeUrl(toBackendUrl(workingData.volume_url));
+    setSnapshotUrl(toBackendUrl(workingData.snapshot_url));
     setShowLabels(false);
     setShowVolume(true); // Show volume since 3D model is available
     setActionMsg('Sample data loaded (10 slices with 3D model)');
@@ -458,38 +465,50 @@ function App() {
     setBodyPart(detectedBodyPart);
     
     setLoading(true);
+    setProcessingStage('Uploading files...');
+    setProcessingProgress(5);
     setError('');
     try {
-      // Use the new API module for upload
       console.log('5. Calling api.uploadFiles...');
-      const result = await api.uploadFiles(Array.from(fileList));
+      let result = await api.uploadFiles(Array.from(fileList));
       console.log('6. API result received:', result);
-      
-      if (result.slice_urls || result.model_url || result.volume_url) {
-        console.log('7. Upload successful - updating state');
-        // Backend successfully processed the files
+
+      if (result.status === 'processing' && result.session_id) {
         setSessionId(result.session_id);
-        setSliceUrls(result.slice_urls || []);
-        setModelUrl(result.model_url || '');
-        setVolumeUrl(result.volume_url || '');
-        setSnapshotUrl(result.snapshot_url || '');
-        setCurrentBodyPart(detectedBodyPart); // Update current body part for labels
-        setShowLabels(false); // Reset labels when new upload
-        setActionMsg('Files uploaded successfully');
-        console.log('8. State updated successfully');
+        setProcessingStage('Processing scan on server...');
+        setProcessingProgress(15);
+        result = await pollUploadStatus(result.session_id, {
+          onProgress: (status, attempt, maxAttempts) => {
+            setProcessingStage(status.stage || 'Processing scan...');
+            const pct = 15 + Math.round((attempt / maxAttempts) * 75);
+            setProcessingProgress(Math.min(pct, 90));
+          },
+        });
+      }
+
+      if (result.slice_urls?.length || result.model_url || result.volume_url || result.snapshot_url) {
+        console.log('7. Upload successful - updating state');
+        setSessionId(result.session_id);
+        setSliceUrls((result.slice_urls || []).map(toBackendUrl));
+        setModelUrl(toBackendUrl(result.model_url || ''));
+        setVolumeUrl(toBackendUrl(result.volume_url || ''));
+        setSnapshotUrl(toBackendUrl(result.snapshot_url || ''));
+        setCurrentBodyPart(detectedBodyPart);
+        setShowLabels(false);
+        setShowVolume(!!result.volume_url);
+        setIdx(0);
+        setProcessingProgress(100);
+        setProcessingStage('Complete');
+        setActionMsg(`Processed ${result.slice_urls?.length || 0} slices`);
         
-        // Run disease classification
         try {
-          console.log('9. Running disease classification...');
           const classificationResult = await api.classifyScan(result.session_id, detectedBodyPart);
-          console.log('10. Classification result:', classificationResult);
           setClassification(classificationResult.classification);
         } catch (e) {
           console.error('Classification failed:', e);
           setClassification(null);
         }
       } else {
-        console.log('7. Upload failed - no processed files');
         throw new Error(result.error || 'Upload failed - no processed files returned');
       }
     } catch (e) {
@@ -501,7 +520,7 @@ function App() {
       });
       // Show full error message including backend details
       let errorMsg = fmtError(e) || 'Upload failed';
-      if (e.message && e.message.includes('details:')) {
+      if (e.message && e.message !== 'Processing failed') {
         errorMsg = e.message;
       }
       setError(errorMsg);
@@ -1027,7 +1046,7 @@ function App() {
                           </div>
                         </div>
                         
-                        {evalRes.two_d ? (
+                        {evalRes.two_d && typeof evalRes.two_d.mean_top1_confidence === 'number' ? (
                           <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                               <div>
@@ -1079,7 +1098,7 @@ function App() {
                             )}
                           </div>
                         ) : (
-                          <div className="text-sm text-neutral-400">No result</div>
+                          <div className="text-sm text-neutral-400">{evalRes.two_d?.notes || 'No 2D result — click Run Evaluation'}</div>
                         )}
                       </div>
 
@@ -1097,7 +1116,7 @@ function App() {
                           </div>
                         </div>
                         
-                        {evalRes.three_d ? (
+                        {evalRes.three_d && typeof evalRes.three_d.top1_confidence === 'number' ? (
                           <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                               <div>
@@ -1154,7 +1173,7 @@ function App() {
                             )}
                           </div>
                         ) : (
-                          <div className="text-sm text-neutral-400">No result</div>
+                          <div className="text-sm text-neutral-400">{evalRes.three_d?.notes || 'No 3D result — click Run Evaluation'}</div>
                         )}
                       </div>
                     </div>

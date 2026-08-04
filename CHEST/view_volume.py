@@ -193,7 +193,10 @@ def build_glb_from_iso(volume: np.ndarray, spacing, origin, out_model: str, iso_
     gauss.SetRadiusFactors(1.5, 1.5, 1.5)
     mc = vtk.vtkMarchingCubes()
     mc.SetInputConnection(gauss.GetOutputPort())
-    mc.SetValue(0, float(np.clip(iso_value, float(np.min(volume)), float(np.max(volume)))))
+  # Keep isosurface in the data range; extreme Otsu values can crash VTK on CT volumes
+    lo, hi = float(np.percentile(volume, 2)), float(np.percentile(volume, 98))
+    iso_clipped = float(np.clip(iso_value, lo, hi))
+    mc.SetValue(0, iso_clipped)
     mc.ComputeGradientsOn()
     mc.ComputeNormalsOn()
     mc.Update()
@@ -234,16 +237,22 @@ def build_glb_from_iso(volume: np.ndarray, spacing, origin, out_model: str, iso_
     normals.Update()
     # Remove all but the largest anatomical structure
     single_chest_polydata = extract_largest_component(normals.GetOutput())
-    # Export as GLB
+    # Export as GLB (vtkGLTFWriter expects vtkMultiBlockDataSet input)
     if hasattr(vtk, 'vtkGLTFWriter'):
         os.makedirs(os.path.dirname(out_model), exist_ok=True)
+        blocks = vtk.vtkMultiBlockDataSet()
+        blocks.SetNumberOfBlocks(1)
+        blocks.SetBlock(0, single_chest_polydata)
         writer = vtk.vtkGLTFWriter()
         writer.SetFileName(out_model)
-        writer.SetInputData(single_chest_polydata)
+        writer.SetInputData(blocks)
         if hasattr(writer, 'SetSaveAsBinary'):
             writer.SetSaveAsBinary(True)
         writer.Write()
-        return
+        if os.path.isfile(out_model) and os.path.getsize(out_model) > 0:
+            return
+        if os.path.isfile(out_model):
+            os.remove(out_model)
     mapper = vtk.vtkPolyDataMapper()
     mapper.SetInputData(single_chest_polydata)
     mapper.ScalarVisibilityOff()
@@ -306,6 +315,7 @@ def parse_args():
     p.add_argument('--vti_max_dim', type=int, default=256, help='Max dimension for VTI downsampling')
     p.add_argument('--interactive', action='store_true', help='Native VTK window for interactive viewing')
     p.add_argument('--snapshot_png', help='Path to a PNG volume rendering snapshot')
+    p.add_argument('--skip-model', action='store_true', help='Skip GLB mesh export (avoids VTK crashes on some scans)')
     return p.parse_args()
 
 def main():
@@ -317,30 +327,33 @@ def main():
     if args.interactive:
         interactive_view(vol, spacing, origin, args.ww, args.wc)
         return 0
-    if not args.out_slices or not args.out_model:
-        print('Missing --out_slices or --out_model')
+    if not args.out_slices:
+        print('Missing --out_slices')
         return 2
     save_png_slices(vol, args.out_slices, args.ww, args.wc)
-    if args.iso == 'auto':
-        iso_val = estimate_iso_otsu(vol)
-        print(f"Auto iso (Otsu): {iso_val}")
-    else:
-        try:
-            iso_val = float(args.iso)
-        except Exception:
-            print("Invalid iso value; falling back to auto Otsu.")
-            iso_val = estimate_iso_otsu(vol)
-    build_glb_from_iso(vol, spacing, origin, args.out_model, iso_val)
+    print(f"Wrote slices to: {args.out_slices}")
     if args.out_vti:
         write_vti(vol, spacing, origin, args.out_vti, args.ww, args.wc, args.vti_max_dim)
-    if getattr(args, 'snapshot_png', None):
-        render_snapshot_png(vol, spacing, origin, args.ww, args.wc, args.snapshot_png)
-    print(f"Wrote slices to: {args.out_slices}")
-    print(f"Wrote model to: {args.out_model}")
-    if args.out_vti:
         print(f"Wrote VTI to: {args.out_vti}")
     if getattr(args, 'snapshot_png', None):
+        render_snapshot_png(vol, spacing, origin, args.ww, args.wc, args.snapshot_png)
         print(f"Wrote snapshot to: {args.snapshot_png}")
+    if args.out_model and not args.skip_model:
+        if args.iso == 'auto':
+            iso_val = estimate_iso_otsu(vol)
+            print(f"Auto iso (Otsu): {iso_val}")
+        else:
+            try:
+                iso_val = float(args.iso)
+            except Exception:
+                print("Invalid iso value; falling back to auto Otsu.")
+                iso_val = estimate_iso_otsu(vol)
+        try:
+            build_glb_from_iso(vol, spacing, origin, args.out_model, iso_val)
+            print(f"Wrote model to: {args.out_model}")
+        except Exception as exc:
+            print(f"GLB export skipped: {exc}")
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main())

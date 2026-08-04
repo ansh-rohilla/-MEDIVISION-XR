@@ -1,41 +1,42 @@
 // API configuration for MEDIVISION-XR
 const API_BASE_URL = 'http://localhost:5050';
 
-// Upload status polling
-export const pollUploadStatus = async (sessionId, maxAttempts = 60, interval = 2000) => {
+// Upload status polling (large chest scans can take several minutes)
+export const pollUploadStatus = async (sessionId, { maxAttempts = 150, interval = 2000, onProgress } = {}) => {
   const token = localStorage.getItem('auth_token');
   const headers = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
   
   for (let i = 0; i < maxAttempts; i++) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/upload/status/${sessionId}`, {
-        headers,
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Status check failed: ${response.status}`);
-      }
-      
-      const status = await response.json();
-      console.log('Upload status check:', status);
-      
-      if (status.status === 'completed') {
-        return status;
-      } else if (status.status === 'error') {
-        throw new Error(status.error || status.details || 'Processing failed');
-      }
-      
-      // Still processing, wait and retry
-      await new Promise(resolve => setTimeout(resolve, interval));
-    } catch (error) {
-      console.error('Status check error:', error);
-      throw error;
+    const response = await fetch(`${API_BASE_URL}/api/upload/status/${sessionId}`, {
+      headers,
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Status check failed (${response.status}): ${text}`);
     }
+    
+    const status = await response.json();
+    console.log('Upload status check:', status);
+
+    if (onProgress) {
+      onProgress(status, i, maxAttempts);
+    }
+    
+    if (status.status === 'completed') {
+      return status;
+    }
+    if (status.status === 'error') {
+      const msg = [status.error, status.details].filter(Boolean).join(': ');
+      throw new Error(msg || 'Processing failed');
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, interval));
   }
   
-  throw new Error('Processing timeout - please try again');
+  throw new Error('Processing timeout - please try again with a smaller scan or ZIP');
 };
 
 // Mock data for fallback
