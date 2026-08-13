@@ -25,7 +25,7 @@ import vtkVolume from 'vtk.js/Sources/Rendering/Core/Volume';
 import vtkVolumeMapper from 'vtk.js/Sources/Rendering/Core/VolumeMapper';
 
 function App() {
-  const BACKEND_ORIGIN = process.env.REACT_APP_BACKEND_ORIGIN || 'http://localhost:5050';
+  const BACKEND_ORIGIN = process.env.REACT_APP_BACKEND_ORIGIN || 'http://localhost:1000';
   const toBackendUrl = (u) => (u && u.startsWith('/')) ? `${BACKEND_ORIGIN}${u}` : u;
   const fmtError = (e) => {
     if (!e) return 'Unknown error';
@@ -624,7 +624,7 @@ function App() {
                     const txt = await resp.text();
                     let j = null; try { j = JSON.parse(txt); } catch {}
                     if(!resp.ok) {
-                      const msg = (j && j.error) || (txt && txt.startsWith('Proxy error') ? 'Backend not reachable. Start Flask on http://localhost:5050' : txt) || 'Login failed';
+                      const msg = (j && j.error) || (txt && txt.startsWith('Proxy error') ? 'Backend not reachable. Start Flask on http://localhost:1000' : txt) || 'Login failed';
                       throw new Error(msg);
                     }
                     if (!j || !j.user) throw new Error('Invalid response from server');
@@ -642,7 +642,7 @@ function App() {
                     const txt = await resp.text();
                     let j = null; try { j = JSON.parse(txt); } catch {}
                     if(!resp.ok) {
-                      const msg = (j && j.error) || (txt && txt.startsWith('Proxy error') ? 'Backend not reachable. Start Flask on http://localhost:5050' : txt) || 'Register failed';
+                      const msg = (j && j.error) || (txt && txt.startsWith('Proxy error') ? 'Backend not reachable. Start Flask on http://localhost:1000' : txt) || 'Register failed';
                       throw new Error(msg);
                     }
                     if (!j || !j.user) throw new Error('Invalid response from server');

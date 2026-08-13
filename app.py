@@ -51,8 +51,8 @@ def create_app():
             '<html><head><title>Medivision XR API</title></head>'
             '<body style="font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding:24px">'
             '<h1>Medivision XR API</h1>'
-            '<p>Backend is running on port 5050.</p>'
-            '<p>Open the frontend at <a href="http://localhost:3000">http://localhost:3000</a>.</p>'
+            '<p>Backend is running on port 1000.</p>'
+            '<p>Open the frontend at <a href="http://localhost:2000">http://localhost:2000</a>.</p>'
             '<p>Health check: <a href="/api/health">/api/health</a></p>'
             '</body></html>'
         )
@@ -69,13 +69,13 @@ def create_app():
             else:
                 return send_from_directory(build_dir, 'index.html')
         else:
-            # Development mode - redirect to localhost:3000
+            # Development mode - redirect to localhost:2000
             return (
                 '<html><head><title>Medivision XR</title></head>'
                 '<body style="font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding:24px">'
                 '<h1>Medivision XR - Development Mode</h1>'
-                '<p>Backend is running on port 5050.</p>'
-                '<p>Frontend is running on <a href="http://localhost:3000">http://localhost:3000</a>.</p>'
+                '<p>Backend is running on port 1000.</p>'
+                '<p>Frontend is running on <a href="http://localhost:2000">http://localhost:2000</a>.</p>'
                 '<p>Health check: <a href="/api/health">/api/health</a></p>'
                 '</body></html>'
             )
@@ -90,6 +90,6 @@ app = create_app()
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', '5050'))
+    port = int(os.environ.get('PORT', '1000'))
     # use_reloader=False keeps background upload jobs alive while code changes
     app.run(host='0.0.0.0', port=port, debug=True, threaded=True, use_reloader=False)
