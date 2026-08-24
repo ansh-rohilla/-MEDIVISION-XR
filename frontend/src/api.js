@@ -1,5 +1,5 @@
 // API configuration for MEDIVISION-XR
-const API_BASE_URL = 'http://localhost:5050';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_ORIGIN || 'http://localhost:1000';
 
 // Upload status polling (large chest scans can take several minutes)
 export const pollUploadStatus = async (sessionId, { maxAttempts = 150, interval = 2000, onProgress } = {}) => {

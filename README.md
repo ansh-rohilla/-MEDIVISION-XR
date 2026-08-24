@@ -36,7 +36,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Start the backend (runs on `http://localhost:5050`)
+3. Start the backend (runs on `http://localhost:1000`)
 
 ```bash
 python app.py
@@ -44,7 +44,7 @@ python app.py
 
 Health check:
 
-- `GET http://localhost:5050/api/health`
+- `GET http://localhost:1000/api/health`
 
 ## Setup & Run (Frontend)
 
@@ -57,12 +57,11 @@ npm start
 
 Frontend runs on:
 
-- `http://localhost:3000`
+- `http://localhost:2000`
 
 ## Notes
 
-- The backend enables CORS for local development origins (port `3000`).
-
+- The backend enables CORS for local development origins (port `2000`).
 
 
 

@@ -78,7 +78,7 @@ try {
 } catch (e) {}
 
 function App() {
-  const BACKEND_ORIGIN = process.env.REACT_APP_BACKEND_ORIGIN || 'http://localhost:5050';
+  const BACKEND_ORIGIN = process.env.REACT_APP_BACKEND_ORIGIN || 'http://localhost:1000';
   const toBackendUrl = (u) => (u && u.startsWith('/')) ? `${BACKEND_ORIGIN}${u}` : u;
   const fmtError = (e) => {
     if (!e) return 'Unknown error';
@@ -498,6 +498,7 @@ function App() {
     setIdx(0);
     setActiveTab('slice2d');
   };
+
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans antialiased">
