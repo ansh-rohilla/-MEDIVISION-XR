@@ -101,10 +101,10 @@ def process_upload_background(session_id, dicom_root, base_dir, static_dir, slic
         cmd = [sys.executable, script_path,
                '--input', dicom_root,
                '--out_slices', slices_dir,
+               '--out_model', model_path,
                '--out_vti', vti_path,
                '--snapshot_png', snapshot_path,
-               '--skip-model',
-               '--iso', 'auto',
+               '--iso', '150',
                '--vti_max_dim', '192']
 
         _set_processing_status(session_id, processed_root, {

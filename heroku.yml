@@ -1,8 +1,0 @@
-build:
-  languages:
-    - python
-  packages:
-    - python-3.9.13
-
-run:
-  web: gunicorn app:app --bind 0.0.0.0:$PORT

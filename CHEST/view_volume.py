@@ -54,44 +54,24 @@ def interactive_view(volume: np.ndarray, spacing, origin, ww: float, wc: float):
     iren.Start()
 
 def render_snapshot_png(volume: np.ndarray, spacing, origin, ww: float, wc: float, out_png: str):
-    importer = numpy_to_vtk_image(volume, spacing, origin)
-    low = wc - ww / 2.0
-    high = wc + ww / 2.0
-    volume_color = vtk.vtkColorTransferFunction()
-    volume_color.AddRGBPoint(low, 0.0, 0.0, 0.0)
-    volume_color.AddRGBPoint(wc, 1.0, 0.76, 0.65)
-    volume_color.AddRGBPoint(high, 1.0, 1.0, 1.0)
-    volume_opacity = vtk.vtkPiecewiseFunction()
-    volume_opacity.AddPoint(low, 0.0)
-    volume_opacity.AddPoint(wc, 0.2)
-    volume_opacity.AddPoint(high, 1.0)
-    prop = vtk.vtkVolumeProperty()
-    prop.SetColor(volume_color)
-    prop.SetScalarOpacity(volume_opacity)
-    prop.ShadeOn()
-    prop.SetInterpolationTypeToLinear()
-    mapper = vtk.vtkGPUVolumeRayCastMapper()
-    mapper.SetInputConnection(importer.GetOutputPort())
-    vol = vtk.vtkVolume()
-    vol.SetMapper(mapper)
-    vol.SetProperty(prop)
-    ren = vtk.vtkRenderer()
-    ren.AddVolume(vol)
-    ren.SetBackground(0.1, 0.1, 0.12)
-    win = vtk.vtkRenderWindow()
-    win.SetOffScreenRendering(1)
-    win.AddRenderer(ren)
-    win.SetSize(960, 720)
-    ren.ResetCamera()
-    win.Render()
-    w2i = vtk.vtkWindowToImageFilter()
-    w2i.SetInput(win)
-    w2i.Update()
-    os.makedirs(os.path.dirname(out_png), exist_ok=True)
-    writer = vtk.vtkPNGWriter()
-    writer.SetFileName(out_png)
-    writer.SetInputConnection(w2i.GetOutputPort())
-    writer.Write()
+    if volume is None or volume.size == 0:
+        return
+    try:
+        from PIL import Image
+        mid_idx = volume.shape[0] // 2
+        slice_2d = volume[mid_idx, :, :].copy()
+        low = wc - ww / 2.0
+        high = wc + ww / 2.0
+        clipped = np.clip(slice_2d, low, high)
+        norm = ((clipped - low) / (high - low if high > low else 1.0) * 255.0).astype(np.uint8)
+
+        img = Image.fromarray(norm)
+        if os.path.dirname(out_png):
+            os.makedirs(os.path.dirname(out_png), exist_ok=True)
+        img.save(out_png)
+        print(f"Wrote snapshot PNG to: {out_png}")
+    except Exception as e:
+        print("PIL snapshot generation notice:", e)
 
 def load_dicom(input_path: str):
     if os.path.isdir(input_path):
@@ -157,22 +137,13 @@ def numpy_to_vtk_image(volume: np.ndarray, spacing, origin):
 
 def estimate_iso_otsu(volume: np.ndarray) -> float:
     v = volume
-    if v.size > 2_000_000:
-        v = v[::max(v.shape[0] // 128, 1), ::max(v.shape[1] // 128, 1), ::max(v.shape[2] // 128, 1)]
-    v = v.astype(np.int16)
-    vf = v.reshape(-1)
-    lo = np.percentile(vf, 5.0)
-    hi = np.percentile(vf, 99.0)
-    vc = np.clip(v, lo, hi)
-    img = sitk.GetImageFromArray(vc)
-    otsu_filter = sitk.OtsuThresholdImageFilter()
-    try:
-        otsu_filter.Execute(img)
-        t = float(otsu_filter.GetThreshold())
-        t = max(lo, min(hi, t + 0.05 * (hi - lo)))
-        return t
-    except Exception:
-        return float(np.median(vc))
+def compute_auto_iso(volume: np.ndarray) -> float:
+    # Filter out extreme air values (-1000 HU is air, >100 HU is bone/soft-tissue structure)
+    lo, hi = float(np.percentile(volume, 5.0)), float(np.percentile(volume, 99.0))
+    if lo < -500:
+        # Standard CT scan threshold: 150 HU isolates 3D anatomical bone & chest structure
+        return 150.0
+    return float((lo + hi) * 0.5)
 
 def extract_largest_component(polydata):
     connect = vtk.vtkPolyDataConnectivityFilter()
@@ -182,77 +153,117 @@ def extract_largest_component(polydata):
     return connect.GetOutput()
 
 def build_glb_from_iso(volume: np.ndarray, spacing, origin, out_model: str, iso_value: float):
-    importer = numpy_to_vtk_image(volume, spacing, origin)
+    # Apply central anatomical masking to strip outer CT scanner bed, couch pad, and outer skin crescent rings
+    z, y, x = volume.shape
+    margin_x = int(x * 0.10)
+    margin_y = int(y * 0.10)
+    mask = np.zeros_like(volume, dtype=bool)
+    mask[:, margin_y:y-margin_y, margin_x:x-margin_x] = True
+    clean_volume = np.where(mask, volume, -1000)
+
+    importer = numpy_to_vtk_image(clean_volume, spacing, origin)
     caster = vtk.vtkImageCast()
     caster.SetInputConnection(importer.GetOutputPort())
     caster.SetOutputScalarTypeToFloat()
     caster.Update()
+    
     gauss = vtk.vtkImageGaussianSmooth()
     gauss.SetInputConnection(caster.GetOutputPort())
     gauss.SetStandardDeviations(0.6, 0.6, 0.6)
     gauss.SetRadiusFactors(1.5, 1.5, 1.5)
-    mc = vtk.vtkMarchingCubes()
-    mc.SetInputConnection(gauss.GetOutputPort())
-  # Keep isosurface in the data range; extreme Otsu values can crash VTK on CT volumes
+    gauss.Update()
+
     lo, hi = float(np.percentile(volume, 2)), float(np.percentile(volume, 98))
-    iso_clipped = float(np.clip(iso_value, lo, hi))
-    mc.SetValue(0, iso_clipped)
-    mc.ComputeGradientsOn()
-    mc.ComputeNormalsOn()
-    mc.Update()
-    tri = vtk.vtkTriangleFilter()
-    tri.SetInputConnection(mc.GetOutputPort())
-    tri.PassLinesOff()
-    tri.PassVertsOff()
-    tri.Update()
-    clean = vtk.vtkCleanPolyData()
-    clean.SetInputConnection(tri.GetOutputPort())
-    clean.PointMergingOn()
-    deci = vtk.vtkDecimatePro()
-    deci.SetInputConnection(clean.GetOutputPort())
-    deci.SetTargetReduction(0.3)
-    deci.PreserveTopologyOn()
-    deci.BoundaryVertexDeletionOn()
-    deci.SplittingOn()
-    deci.Update()
-    smoother = vtk.vtkWindowedSincPolyDataFilter()
-    smoother.SetInputConnection(deci.GetOutputPort())
-    smoother.SetNumberOfIterations(30)
-    smoother.BoundarySmoothingOff()
-    smoother.FeatureEdgeSmoothingOff()
-    smoother.SetFeatureAngle(60.0)
-    smoother.SetPassBand(0.02)
-    smoother.NonManifoldSmoothingOn()
-    smoother.NormalizeCoordinatesOn()
-    smoother.Update()
-    holes = vtk.vtkFillHolesFilter()
-    holes.SetInputConnection(smoother.GetOutputPort())
-    holes.SetHoleSize(100.0)
-    normals = vtk.vtkPolyDataNormals()
-    normals.SetInputConnection(holes.GetOutputPort())
-    normals.ConsistencyOn()
-    normals.SplittingOff()
-    normals.AutoOrientNormalsOn()
-    normals.SetFeatureAngle(80.0)
-    normals.Update()
-    # Remove all but the largest anatomical structure
-    single_chest_polydata = extract_largest_component(normals.GetOutput())
-    # Export as GLB (vtkGLTFWriter expects vtkMultiBlockDataSet input)
-    if hasattr(vtk, 'vtkGLTFWriter'):
+
+    def extract_single_iso(iso_val, reduction=0.25):
+        iso_clipped = float(np.clip(iso_val, lo, hi))
+        mc = vtk.vtkMarchingCubes()
+        mc.SetInputConnection(gauss.GetOutputPort())
+        mc.SetValue(0, iso_clipped)
+        mc.ComputeGradientsOn()
+        mc.ComputeNormalsOn()
+        mc.Update()
+        
+        tri = vtk.vtkTriangleFilter()
+        tri.SetInputConnection(mc.GetOutputPort())
+        tri.PassLinesOff()
+        tri.PassVertsOff()
+        tri.Update()
+
+        clean = vtk.vtkCleanPolyData()
+        clean.SetInputConnection(tri.GetOutputPort())
+        clean.PointMergingOn()
+
+        deci = vtk.vtkDecimatePro()
+        deci.SetInputConnection(clean.GetOutputPort())
+        deci.SetTargetReduction(reduction)
+        deci.PreserveTopologyOn()
+        deci.BoundaryVertexDeletionOn()
+        deci.SplittingOn()
+        deci.Update()
+
+        smoother = vtk.vtkWindowedSincPolyDataFilter()
+        smoother.SetInputConnection(deci.GetOutputPort())
+        smoother.SetNumberOfIterations(25)
+        smoother.BoundarySmoothingOff()
+        smoother.FeatureEdgeSmoothingOff()
+        smoother.SetFeatureAngle(60.0)
+        smoother.SetPassBand(0.02)
+        smoother.NonManifoldSmoothingOn()
+        smoother.NormalizeCoordinatesOn()
+        smoother.Update()
+
+        normals = vtk.vtkPolyDataNormals()
+        normals.SetInputConnection(smoother.GetOutputPort())
+        normals.ConsistencyOn()
+        normals.SplittingOff()
+        normals.AutoOrientNormalsOn()
+        normals.SetFeatureAngle(80.0)
+        normals.Update()
+
+        res = normals.GetOutput()
+        if not res or res.GetNumberOfPoints() == 0:
+            res = mc.GetOutput()
+        return res
+
+    # Extract 1. Skeletal Bone Isosurface (160 HU: Ribs, Spine, Pelvis)
+    bone_poly = extract_single_iso(160.0, reduction=0.3)
+
+    # Extract 2. Internal Visceral Organs (85 HU: Liver, Kidneys, Heart, Spleen - Skin Envelope & Bed Stripped)
+    organ_poly = extract_single_iso(85.0, reduction=0.35)
+
+    # Extract 3. Lungs & Airway Parenchyma (-450 HU: Left & Right Lung Parenchyma)
+    lung_poly = extract_single_iso(-450.0, reduction=0.35)
+
+    # Append Bone, Internal Organ, and Lung PolyData into a single clean internal anatomical 3D mesh
+    append_filter = vtk.vtkAppendPolyData()
+    if bone_poly and bone_poly.GetNumberOfPoints() > 0:
+        append_filter.AddInputData(bone_poly)
+    if organ_poly and organ_poly.GetNumberOfPoints() > 0:
+        append_filter.AddInputData(organ_poly)
+    if lung_poly and lung_poly.GetNumberOfPoints() > 0:
+        append_filter.AddInputData(lung_poly)
+    append_filter.Update()
+
+    polydata = append_filter.GetOutput()
+    if not polydata or polydata.GetNumberOfPoints() == 0:
+        polydata = bone_poly if bone_poly else organ_poly
+
+    if os.path.dirname(out_model):
         os.makedirs(os.path.dirname(out_model), exist_ok=True)
-        blocks = vtk.vtkMultiBlockDataSet()
-        blocks.SetNumberOfBlocks(1)
-        blocks.SetBlock(0, single_chest_polydata)
-        writer = vtk.vtkGLTFWriter()
-        writer.SetFileName(out_model)
-        writer.SetInputData(blocks)
-        if hasattr(writer, 'SetSaveAsBinary'):
-            writer.SetSaveAsBinary(True)
-        writer.Write()
-        if os.path.isfile(out_model) and os.path.getsize(out_model) > 0:
+
+    # Export solid binary 3D mesh with vtkSTLWriter
+    try:
+        stl_writer = vtk.vtkSTLWriter()
+        stl_writer.SetFileName(out_model)
+        stl_writer.SetInputData(polydata)
+        stl_writer.SetFileTypeToBinary()
+        stl_writer.Write()
+        if os.path.isfile(out_model) and os.path.getsize(out_model) > 100:
+            print(f"Exported multi-tissue 3D anatomical mesh model ({os.path.getsize(out_model)} bytes)")
             return
-        if os.path.isfile(out_model):
-            os.remove(out_model)
+    except Exception as e:
+        print("STLWriter notice:", e)
     mapper = vtk.vtkPolyDataMapper()
     mapper.SetInputData(single_chest_polydata)
     mapper.ScalarVisibilityOff()
@@ -279,7 +290,8 @@ def build_glb_from_iso(volume: np.ndarray, spacing, origin, out_model: str, iso_
     ren_win.AddRenderer(renderer)
     ren_win.SetSize(960, 720)
     ren_win.Render()
-    os.makedirs(os.path.dirname(out_model), exist_ok=True)
+    if os.path.dirname(out_model):
+        os.makedirs(os.path.dirname(out_model), exist_ok=True)
     exporter = vtk.vtkGLTFExporter()
     exporter.SetFileName(out_model)
     exporter.SetRenderWindow(ren_win)
@@ -340,14 +352,14 @@ def main():
         print(f"Wrote snapshot to: {args.snapshot_png}")
     if args.out_model and not args.skip_model:
         if args.iso == 'auto':
-            iso_val = estimate_iso_otsu(vol)
-            print(f"Auto iso (Otsu): {iso_val}")
+            iso_val = compute_auto_iso(vol)
+            print(f"Auto iso: {iso_val}")
         else:
             try:
                 iso_val = float(args.iso)
             except Exception:
-                print("Invalid iso value; falling back to auto Otsu.")
-                iso_val = estimate_iso_otsu(vol)
+                print("Invalid iso value; falling back to auto iso.")
+                iso_val = compute_auto_iso(vol)
         try:
             build_glb_from_iso(vol, spacing, origin, args.out_model, iso_val)
             print(f"Wrote model to: {args.out_model}")

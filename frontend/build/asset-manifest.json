@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.c56af00f.css",
-    "main.js": "/static/js/main.09fa1ab8.js",
+    "main.css": "/static/css/main.e76770bb.css",
+    "main.js": "/static/js/main.9ec2d21e.js",
     "static/media/vtkVolumeFS.glsl": "/static/media/vtkVolumeFS.964483a4bb3a72f77e3f.glsl",
     "static/media/vtkLineIntegralConvolution2D_SC.glsl": "/static/media/vtkLineIntegralConvolution2D_SC.2957a2e46d8939587314.glsl",
     "static/media/vtkLineIntegralConvolution2D_LICI.glsl": "/static/media/vtkLineIntegralConvolution2D_LICI.7e42fafabb05f020d2ed.glsl",
@@ -23,13 +23,11 @@
     "static/media/vtkVolumeVS.glsl": "/static/media/vtkVolumeVS.c00e21b62bcea1fbc1ff.glsl",
     "static/media/vtkPolyData2DFS.glsl": "/static/media/vtkPolyData2DFS.4e4a3a19ba95c1212f0d.glsl",
     "static/media/vtkLineIntegralConvolution2D_VT.glsl": "/static/media/vtkLineIntegralConvolution2D_VT.586e4b9fb27c7006ea26.glsl",
-    "static/media/vtkLineIntegralConvolution2D_quadVS.glsl": "/static/media/vtkLineIntegralConvolution2D_quadVS.2b51ba0c265ce975bfa1.glsl",
     "index.html": "/index.html",
-    "main.c56af00f.css.map": "/static/css/main.c56af00f.css.map",
-    "main.09fa1ab8.js.map": "/static/js/main.09fa1ab8.js.map"
+    "static/media/vtkLineIntegralConvolution2D_quadVS.glsl": "/static/media/vtkLineIntegralConvolution2D_quadVS.2b51ba0c265ce975bfa1.glsl"
   },
   "entrypoints": [
-    "static/css/main.c56af00f.css",
-    "static/js/main.09fa1ab8.js"
+    "static/css/main.e76770bb.css",
+    "static/js/main.9ec2d21e.js"
   ]
 }

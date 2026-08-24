@@ -35,7 +35,7 @@ const OrganLabels = ({ bodyPart, containerRef, visible, backendOrigin }) => {
 
   // Use container bounds directly for 3D viewer
   useEffect(() => {
-    if (!containerRef.current || !visible) return;
+    if (!containerRef?.current || !visible) return;
     
     const containerRect = containerRef.current.getBoundingClientRect();
     
