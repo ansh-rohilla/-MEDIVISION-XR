@@ -87,6 +87,21 @@ function App() {
     try { return JSON.stringify(e); } catch { return String(e); }
   };
 
+  const detectBodyPart = (files) => {
+    if (!files || !files.length) return 'chest';
+    const fileArray = Array.from(files);
+    for (const f of fileArray) {
+      const name = (f.name || f.webkitRelativePath || '').toLowerCase();
+      if (name.includes('brain') || name.includes('head')) return 'brain';
+      if (name.includes('chest') || name.includes('lung') || name.includes('thorax')) return 'chest';
+      if (name.includes('abdomen') || name.includes('stomach') || name.includes('liver')) return 'abdomen';
+      if (name.includes('heart') || name.includes('cardio')) return 'heart';
+      if (name.includes('neck')) return 'neck';
+      if (name.includes('body') || name.includes('full')) return 'fullbody';
+    }
+    return 'chest';
+  };
+
   // State Management
   const [sliceUrls, setSliceUrls] = useState([]);
   const [bodyPart, setBodyPart] = useState('brain');
@@ -220,60 +235,7 @@ function App() {
     setUser(null);
   };
 
-  // Upload Logic
-  const uploadFiles = async (fileList) => {
-    setLoading(true);
-    setProcessingStage('Uploading files to server...');
-    setProcessingProgress(5);
-    setError('');
-    try {
-      let result = await api.uploadFiles(Array.from(fileList));
 
-      if (result.status === 'processing' && result.session_id) {
-        setSessionId(result.session_id);
-        setProcessingStage('Processing volumetric scan...');
-        setProcessingProgress(15);
-        result = await pollUploadStatus(result.session_id, {
-          onProgress: (status, attempt, maxAttempts) => {
-            setProcessingStage(status.stage || 'Processing DICOM volume...');
-            const pct = 15 + Math.round((attempt / maxAttempts) * 75);
-            setProcessingProgress(Math.min(pct, 90));
-          },
-        });
-      }
-
-      if (result.slice_urls?.length || result.model_url || result.volume_url || result.snapshot_url) {
-        setSessionId(result.session_id);
-        setSliceUrls((result.slice_urls || []).map(toBackendUrl));
-        setModelUrl(toBackendUrl(result.model_url || ''));
-        setVolumeUrl(toBackendUrl(result.volume_url || ''));
-        setSnapshotUrl(toBackendUrl(result.snapshot_url || ''));
-        setShowLabels(false);
-        setShowVolume(!!result.volume_url);
-        setIdx(0);
-        setProcessingProgress(100);
-        setProcessingStage('Complete');
-        setActionMsg(`Processed ${result.slice_urls?.length || 0} slices`);
-        
-        // Auto jump to 2D viewer tab
-        setActiveTab('slice2d');
-
-        try {
-          const classificationResult = await api.classifyScan(result.session_id, 'chest');
-          setClassification(classificationResult.classification);
-        } catch (e) {
-          console.error('Classification failed:', e);
-          setClassification(null);
-        }
-      } else {
-        throw new Error(result.error || 'Upload failed - no processed files returned');
-      }
-    } catch (e) {
-      setError(fmtError(e));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // VTK 3D Volume Mounting Effect
   useEffect(() => {
@@ -498,6 +460,145 @@ function App() {
     setIdx(0);
     setActiveTab('slice2d');
   };
+
+
+  const uploadFiles = async (fileList) => {
+    console.log('=== UPLOAD DEBUG START ===');
+    console.log('1. fileList received:', fileList);
+    console.log('2. fileList length:', fileList.length);
+    console.log('3. BACKEND_ORIGIN:', BACKEND_ORIGIN);
+    console.log('4. token present:', !!token);
+    console.log('4.1. current token value:', token);
+    
+    // Use manual body part if selected, otherwise auto-detect
+    const detectedBodyPart = manualBodyPart || detectBodyPart(fileList);
+    console.log('4.2. Body part:', detectedBodyPart, '(manual:', manualBodyPart, ')');
+    setBodyPart(detectedBodyPart);
+    
+    setLoading(true);
+    setProcessingStage('Uploading files...');
+    setProcessingProgress(5);
+    setError('');
+    try {
+      console.log('5. Calling api.uploadFiles...');
+      let result = await api.uploadFiles(Array.from(fileList));
+      console.log('6. API result received:', result);
+
+      if (result.status === 'processing' && result.session_id) {
+        setSessionId(result.session_id);
+        setProcessingStage('Processing scan on server...');
+        setProcessingProgress(15);
+        result = await pollUploadStatus(result.session_id, {
+          onProgress: (status, attempt, maxAttempts) => {
+            setProcessingStage(status.stage || 'Processing scan...');
+            const pct = 15 + Math.round((attempt / maxAttempts) * 75);
+            setProcessingProgress(Math.min(pct, 90));
+          },
+        });
+      }
+
+      if (result.slice_urls?.length || result.model_url || result.volume_url || result.snapshot_url) {
+        console.log('7. Upload successful - updating state');
+        setSessionId(result.session_id);
+        setSliceUrls((result.slice_urls || []).map(toBackendUrl));
+        setModelUrl(toBackendUrl(result.model_url || ''));
+        setVolumeUrl(toBackendUrl(result.volume_url || ''));
+        setSnapshotUrl(toBackendUrl(result.snapshot_url || ''));
+        setCurrentBodyPart(detectedBodyPart);
+        setShowLabels(false);
+        setShowVolume(!!result.volume_url);
+        setIdx(0);
+        setProcessingProgress(100);
+        setProcessingStage('Complete');
+        setActionMsg(`Processed ${result.slice_urls?.length || 0} slices`);
+        
+        try {
+          const classificationResult = await api.classifyScan(result.session_id, detectedBodyPart);
+          setClassification(classificationResult.classification);
+        } catch (e) {
+          console.error('Classification failed:', e);
+          setClassification(null);
+        }
+      } else {
+        throw new Error(result.error || 'Upload failed - no processed files returned');
+      }
+    } catch (e) {
+      console.log('9. Upload error caught:', e);
+      console.log('10. Error details:', {
+        message: e.message,
+        stack: e.stack,
+        name: e.name
+      });
+      // Show full error message including backend details
+      let errorMsg = fmtError(e) || 'Upload failed';
+      if (e.message && e.message !== 'Processing failed') {
+        errorMsg = e.message;
+      }
+      setError(errorMsg);
+    } finally {
+      console.log('11. Setting loading to false');
+      setLoading(false);
+      console.log('=== UPLOAD DEBUG END ===');
+    }
+  };
+
+  const onFolderChange = (e) => {
+    console.log('=== FOLDER CHANGE DEBUG START ===');
+    console.log('1. Folder change event triggered');
+    console.log('2. e.target:', e.target);
+    const files = e.target.files;
+    console.log('3. files from event:', files);
+    console.log('4. files length:', files ? files.length : 0);
+    if (files && files.length) {
+      console.log('5. Files found, calling uploadFiles');
+      console.log('6. File details:', Array.from(files).map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        webkitRelativePath: f.webkitRelativePath
+      })));
+      uploadFiles(files);
+    } else {
+      console.log('5. No files found');
+    }
+    console.log('=== FOLDER CHANGE DEBUG END ===');
+  };
+
+  const onZipChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files && files.length) {
+      console.log('ZIP file selected:', files.length);
+      console.log('File details:', files.map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type
+      })));
+      // Send the ZIP as a single file
+      uploadFiles(files);
+    } else {
+      setError('No ZIP file selected');
+    }
+  };
+
+  const openNativeViewer = async () => {
+    setActionMsg('');
+    try {
+      const resp = await apiFetch('/api/open_interactive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      const txt = await resp.text();
+      let data;
+      try { data = JSON.parse(txt); } catch { throw new Error(txt); }
+      if (!resp.ok) throw new Error(data.error || txt);
+      setActionMsg(`Launched native viewer (pid ${data.pid}). A separate window should open.`);
+    } catch (e) {
+      setError(`Failed to open native viewer: ${fmtError(e)}`);
+    }
+  };
+
+
 
 
   return (
