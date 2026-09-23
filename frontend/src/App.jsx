@@ -653,6 +653,7 @@ function App() {
               uploadProgress={processingProgress}
               processingStatus={{ stage: processingStage }}
               error={error}
+              onOpenDemo={loadDemoData}
             />
           )}
 
