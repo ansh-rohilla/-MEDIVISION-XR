@@ -9,6 +9,7 @@ import Dicom3DViewer from './components/Dicom3DViewer';
 import ThreeDicomViewer from './components/ThreeDicomViewer';
 import OrganSegmentationViewer from './components/OrganSegmentationViewer';
 import AiDiagnosticCard from './components/AiDiagnosticCard';
+import AiDiagnosticDetails from './components/AiDiagnosticDetails';
 import AccuracyComparison from './components/AccuracyComparison';
 import OrganLabels from './OrganLabels';
 import ScanMetadata from './ScanMetadata';
@@ -729,6 +730,12 @@ function App() {
             <div className="space-y-6">
               <AiDiagnosticCard
                 classificationData={classification}
+                onNavigateToCallouts={() => setActiveTab('organ_segmentation')}
+              />
+              <AiDiagnosticDetails
+                classificationData={classification}
+                onNavigateTo2D={() => setActiveTab('slice2d')}
+                onNavigateTo3D={() => setActiveTab('volume3d')}
                 onNavigateToCallouts={() => setActiveTab('organ_segmentation')}
               />
             </div>
