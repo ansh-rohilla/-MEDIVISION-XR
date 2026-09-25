@@ -8,6 +8,7 @@ import Dicom2DViewer from './components/Dicom2DViewer';
 import Dicom2DDetailsPanel from './components/Dicom2DDetailsPanel';
 import Dicom3DViewer from './components/Dicom3DViewer';
 import ThreeDicomViewer from './components/ThreeDicomViewer';
+import Dicom3DDetailsPanel from './components/Dicom3DDetailsPanel';
 import OrganSegmentationViewer from './components/OrganSegmentationViewer';
 import AiDiagnosticCard from './components/AiDiagnosticCard';
 import AiDiagnosticDetails from './components/AiDiagnosticDetails';
@@ -688,6 +689,14 @@ function App() {
                 snapshotUrl={snapshotUrl}
                 modelUrl={modelUrl}
                 volumeUrl={volumeUrl}
+              />
+
+              <Dicom3DDetailsPanel
+                modelUrl={modelUrl}
+                volumeUrl={volumeUrl}
+                onNavigateTo2D={() => setActiveTab('slice2d')}
+                onNavigateToAI={() => setActiveTab('ai_results')}
+                onNavigateToCallouts={() => setActiveTab('organ_segmentation')}
               />
             </div>
           )}
