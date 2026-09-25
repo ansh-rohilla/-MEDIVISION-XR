@@ -5,6 +5,7 @@ import HeroSection from './components/HeroSection';
 import AuthModal from './components/AuthModal';
 import UploadZone from './components/UploadZone';
 import Dicom2DViewer from './components/Dicom2DViewer';
+import Dicom2DDetailsPanel from './components/Dicom2DDetailsPanel';
 import Dicom3DViewer from './components/Dicom3DViewer';
 import ThreeDicomViewer from './components/ThreeDicomViewer';
 import OrganSegmentationViewer from './components/OrganSegmentationViewer';
@@ -667,37 +668,15 @@ function App() {
                 metadata={{ sessionId, bodyPart }}
               />
 
-              {/* Organ Anatomical Segmentation Overlay Panel */}
-              {sliceUrls.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <OrganLabels
-                      labels={mockLabels}
-                      showLabels={showLabels}
-                      setShowLabels={setShowLabels}
-                      currentBodyPart={currentBodyPart || 'chest'}
-                      bodyPart={currentBodyPart || 'chest'}
-                      sessionId={sessionId}
-                      containerRef={vtkContainerRef}
-                      visible={showLabels}
-                    />
-                  </div>
-
-                  <div>
-                    <ScanMetadata
-                      metadata={{
-                        sessionId: sessionId || '3cb8fa29...',
-                        modality: 'CT',
-                        bodyPart: currentBodyPart || 'Chest',
-                        sliceCount: sliceUrls.length,
-                        sliceThickness: '1.25 mm',
-                        kvp: '120 kV',
-                        exposure: '200 mA',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
+              <Dicom2DDetailsPanel
+                currentSliceIdx={idx}
+                totalSlices={sliceUrls.length || 218}
+                bodyPart={currentBodyPart || bodyPart || 'Chest'}
+                sessionId={sessionId}
+                onSliceChange={setIdx}
+                onNavigateTo3D={() => setActiveTab('volume3d')}
+                onNavigateToAI={() => setActiveTab('ai_results')}
+              />
             </div>
           )}
 
