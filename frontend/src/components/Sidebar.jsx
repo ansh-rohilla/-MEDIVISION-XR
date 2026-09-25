@@ -14,7 +14,10 @@ import {
   Lock,
   Sparkles,
   ChevronRight,
-  Wifi
+  Wifi,
+  Sliders,
+  SlidersHorizontal,
+  Target
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab, hasScan = false }) {
@@ -88,27 +91,44 @@ export default function Sidebar({ activeTab, setActiveTab, hasScan = false }) {
   );
 
   return (
-    <aside className="w-full md:w-64 bg-white border border-slate-200 rounded-3xl p-4 flex flex-col justify-between shrink-0 shadow-card space-y-6">
+    <aside className="w-full md:w-64 bg-white border border-slate-200 rounded-3xl p-4 flex flex-col shrink-0 shadow-card space-y-4 sticky top-6 h-fit">
       
-      {/* Upper Navigation Sections */}
-      <div className="space-y-5">
-        
-        {/* Section 1: Main Navigation */}
-        {renderNavGroup('Navigation', mainNavigation)}
+      {/* Section 1: Main Navigation */}
+      {renderNavGroup('Navigation', mainNavigation)}
 
-        {/* Section 2: Workstation Viewers */}
-        {renderNavGroup('3D Workstation', workstationTools)}
+      {/* Section 2: Workstation Viewers */}
+      {renderNavGroup('3D Workstation', workstationTools)}
 
-        {/* Section 3: AI Intelligence */}
-        {renderNavGroup('AI Diagnostics', aiIntelligence)}
+      {/* Section 3: AI Intelligence */}
+      {renderNavGroup('AI Diagnostics', aiIntelligence)}
 
+      {/* Quick Active Scan Metadata Widget */}
+      <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+        <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+          <span>Active Session</span>
+          <span className="text-brand-700 font-mono">CT #3cb8</span>
+        </div>
+        <div className="space-y-1 text-xs font-bold text-slate-800">
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-slate-500 font-medium">Modality</span>
+            <span className="font-mono text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded border border-brand-200 text-[10px]">CT Scan</span>
+          </div>
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-slate-500 font-medium">Frames</span>
+            <span className="font-mono text-slate-800">195 DICOM</span>
+          </div>
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-slate-500 font-medium">HU Window</span>
+            <span className="font-mono text-slate-800">Soft Tissue</span>
+          </div>
+        </div>
       </div>
 
       {/* Lower System Workstation Cards */}
-      <div className="space-y-4 pt-2 border-t border-slate-100">
+      <div className="space-y-3 pt-2 border-t border-slate-100">
         
         {/* System Engine Card */}
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-brand-950 text-white space-y-2 shadow-md">
+        <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-900 to-brand-950 text-white space-y-1.5 shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-300">Engine Core</span>
             <Sparkles className="w-3.5 h-3.5 text-brand-400" />
@@ -120,9 +140,9 @@ export default function Sidebar({ activeTab, setActiveTab, hasScan = false }) {
         </div>
 
         {/* Live System Status Monitor */}
-        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs">
+        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5 text-xs">
           <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">System Monitor</p>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             {systemStatus.map((st, i) => {
               const Icon = st.icon;
               return (
@@ -139,7 +159,7 @@ export default function Sidebar({ activeTab, setActiveTab, hasScan = false }) {
         </div>
 
         {/* Security & HIPAA Compliance Tag */}
-        <div className="pt-2 text-xs text-slate-500 flex items-center justify-between">
+        <div className="pt-1 text-xs text-slate-500 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-slate-700 font-bold text-[11px]">
             <ShieldCheck className="w-4 h-4 text-emerald-600" /> DICOM Part 10 & HIPAA
           </span>
