@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Activity, 
   User, 
@@ -16,7 +16,12 @@ import {
   Wifi,
   ChevronRight,
   SlidersHorizontal,
-  Command
+  Command,
+  Brain,
+  Layers,
+  Box,
+  Check,
+  X
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -29,6 +34,66 @@ export default function Navbar({
   backendConnected = true 
 }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: 'Pulmonary Nodule Classified (94.8%)',
+      desc: 'MedicalNet 3D ResNet identified high suspicion nodule in Series #3cb8fa29.',
+      time: '2 mins ago',
+      unread: true,
+      type: 'high',
+      icon: Brain,
+      targetTab: 'ai_results'
+    },
+    {
+      id: 2,
+      title: 'PACS DICOM Gateway Ingestion Synced',
+      desc: '195 DICOM frames anonymized under HIPAA guidelines.',
+      time: '12 mins ago',
+      unread: true,
+      type: 'info',
+      icon: Layers,
+      targetTab: 'slice2d'
+    },
+    {
+      id: 3,
+      title: '3D Volumetric Mesh Rendered',
+      desc: 'Marching Cubes WebGL GLB geometry generated at 60 FPS.',
+      time: '25 mins ago',
+      unread: true,
+      type: 'success',
+      icon: Box,
+      targetTab: 'volume3d'
+    }
+  ]);
+
+  const popoverRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const handleMarkAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
+
+  const handleNotificationClick = (notification) => {
+    setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, unread: false } : n));
+    if (notification.targetTab) {
+      setActiveTab(notification.targetTab);
+    }
+    setShowNotifications(false);
+  };
 
   const getTabLabel = (tab) => {
     switch (tab) {
@@ -80,7 +145,7 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Center: Global Search Bar & Live System Status Badges (Fills the empty space) */}
+          {/* Center: Global Search Bar & Live System Status Badges */}
           <div className="flex-1 max-w-xl hidden md:flex items-center space-x-3">
             
             {/* Global Search Bar */}
@@ -122,14 +187,106 @@ export default function Navbar({
               <span>New Scan</span>
             </button>
 
-            {/* Notification Bell */}
-            <button 
-              className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100/80 transition-colors"
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
-            </button>
+            {/* Notification Bell Dropdown Container */}
+            <div className="relative" ref={popoverRef}>
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className={`relative p-2 rounded-xl text-slate-500 hover:text-slate-900 transition-colors ${
+                  showNotifications ? 'bg-slate-100 text-slate-900' : 'hover:bg-slate-100/80'
+                }`}
+                title="Radiology Alerts & Notifications"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center ring-2 ring-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Popover Dropdown Box */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl border border-slate-200 shadow-2xl z-50 overflow-hidden text-xs">
+                  
+                  {/* Popover Header */}
+                  <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Bell className="w-4 h-4 text-brand-700" />
+                      <h4 className="font-bold text-slate-900">Radiology Notifications</h4>
+                      {unreadCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold">
+                          {unreadCount} New
+                        </span>
+                      )}
+                    </div>
+
+                    {unreadCount > 0 && (
+                      <button 
+                        onClick={handleMarkAllRead}
+                        className="text-[11px] text-brand-700 hover:text-brand-800 font-bold flex items-center space-x-1"
+                      >
+                        <Check className="w-3 h-3" />
+                        <span>Mark all read</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Notifications List */}
+                  <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+                    {notifications.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => handleNotificationClick(item)}
+                          className={`p-3.5 flex items-start space-x-3 cursor-pointer transition-colors ${
+                            item.unread ? 'bg-brand-50/40 hover:bg-brand-50/70' : 'hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                            item.type === 'high' 
+                              ? 'bg-rose-100 text-rose-700' 
+                              : item.type === 'success'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-brand-100 text-brand-700'
+                          }`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+
+                          <div className="flex-1 space-y-0.5">
+                            <div className="flex items-center justify-between">
+                              <h5 className={`text-xs font-bold ${item.unread ? 'text-slate-900 font-extrabold' : 'text-slate-700'}`}>
+                                {item.title}
+                              </h5>
+                              {item.unread && (
+                                <span className="w-2 h-2 rounded-full bg-brand-600"></span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-normal">{item.desc}</p>
+                            <p className="text-[10px] font-mono text-slate-400 pt-0.5">{item.time}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Popover Footer */}
+                  <div className="p-3 bg-slate-50 border-t border-slate-100 text-center">
+                    <button
+                      onClick={() => {
+                        setActiveTab('ai_results');
+                        setShowNotifications(false);
+                      }}
+                      className="text-[11px] font-bold text-brand-700 hover:text-brand-800 flex items-center justify-center space-x-1 mx-auto"
+                    >
+                      <span>Open AI Diagnostic Suite</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                </div>
+              )}
+            </div>
 
             {/* Active Session Identifier */}
             {sessionId && (
