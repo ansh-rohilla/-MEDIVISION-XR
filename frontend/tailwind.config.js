@@ -5,12 +5,17 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          50: '#F0F7FF',
-          100: '#E0EFFF',
-          500: '#2563EB',
-          700: '#0F4C81',
-          800: '#0A3760',
-          900: '#062442',
+          50: '#F0F9FF',
+          100: '#E0F2FE',
+          200: '#BAE6FD',
+          300: '#7DD3FC',
+          400: '#38BDF8',
+          500: '#0EA5E9',
+          600: '#0284C7',
+          700: '#0369A1',
+          800: '#075985',
+          900: '#0C4A6E',
+          950: '#082F49',
         },
         accent: {
           400: '#22D3EE',
@@ -31,15 +36,15 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'Fira Code', 'monospace'],
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(15, 76, 129, 0.08)',
+        'glass': '0 8px 32px 0 rgba(2, 132, 199, 0.08)',
         'glass-dark': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
         'card': '0 2px 10px -2px rgba(15, 23, 42, 0.05), 0 4px 20px -2px rgba(15, 23, 42, 0.04)',
-        'card-hover': '0 12px 30px -4px rgba(15, 76, 129, 0.12), 0 4px 12px -2px rgba(15, 76, 129, 0.08)',
-        'glow': '0 0 25px -5px rgba(6, 182, 212, 0.4)',
+        'card-hover': '0 12px 30px -4px rgba(2, 132, 199, 0.14), 0 4px 12px -2px rgba(2, 132, 199, 0.08)',
+        'glow': '0 0 25px -5px rgba(14, 165, 233, 0.4)',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
