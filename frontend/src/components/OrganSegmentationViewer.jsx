@@ -295,15 +295,47 @@ export default function OrganSegmentationViewer({
   const [selectedColor, setSelectedColor] = useState(COLOR_PRESETS[0]);
   const [wireframe, setWireframe] = useState(false);
 
-  // Determine active region
+  // Automatically determine active region from bodyPart, classification data, and model URLs
   const determineRegion = () => {
     const bp = (bodyPart || '').toLowerCase();
-    if (bp.includes('brain') || bp.includes('head') || bp.includes('skull') || bp.includes('neuro')) {
+    const diag = (classificationData?.diagnosis || classificationData?.type || classificationData?.description || classificationData?.body_part || '').toLowerCase();
+    const mUrl = (modelUrl || '').toLowerCase();
+    const sUrl = (snapshotUrl || '').toLowerCase();
+
+    const combinedStr = `${bp} ${diag} ${mUrl} ${sUrl}`;
+
+    // 1. Brain / Head / Skull / Neuro / Tumor / Neck indicators
+    if (
+      combinedStr.includes('brain') || 
+      combinedStr.includes('head') || 
+      combinedStr.includes('skull') || 
+      combinedStr.includes('neuro') || 
+      combinedStr.includes('tumor') || 
+      combinedStr.includes('humanneck') || 
+      combinedStr.includes('neck') ||
+      combinedStr.includes('cranial') ||
+      combinedStr.includes('cranium') ||
+      combinedStr.includes('intracranial') ||
+      combinedStr.includes('cervical') ||
+      combinedStr.includes('glioblastoma')
+    ) {
       return 'brain';
     }
-    if (bp.includes('abdo') || bp.includes('pelv') || bp.includes('liver') || bp.includes('kidney')) {
+
+    // 2. Abdomen / Liver / Kidney / Renal / Viscera indicators
+    if (
+      combinedStr.includes('abdo') || 
+      combinedStr.includes('pelv') || 
+      combinedStr.includes('liver') || 
+      combinedStr.includes('kidney') ||
+      combinedStr.includes('renal') ||
+      combinedStr.includes('spleen') ||
+      combinedStr.includes('viscera')
+    ) {
       return 'abdomen';
     }
+
+    // 3. Default to chest / thorax
     return 'chest';
   };
 
@@ -311,7 +343,7 @@ export default function OrganSegmentationViewer({
 
   useEffect(() => {
     setActiveRegion(determineRegion());
-  }, [bodyPart]);
+  }, [bodyPart, modelUrl, snapshotUrl, classificationData]);
 
   // Construct organ set with Pathology Entry
   const buildOrganSetWithAI = () => {
