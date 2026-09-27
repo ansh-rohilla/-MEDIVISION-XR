@@ -32,6 +32,16 @@ export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }
 
   const presets = [
     {
+      id: 'fullbody',
+      title: 'Full Body & Torso CT',
+      bodyPart: 'FullBody',
+      slices: 340,
+      modality: 'CT',
+      desc: 'Systemic multi-organ segmentation covering head, chest, abdomen, spine & pelvic girdle.',
+      tag: 'Full Scan 3D',
+      color: 'border-indigo-500 bg-indigo-50/40 text-indigo-700'
+    },
+    {
       id: 'chest',
       title: 'Chest & Pulmonary CT',
       bodyPart: 'Chest',

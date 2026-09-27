@@ -279,6 +279,93 @@ const BASE_ORGAN_SETS = {
       volume: '540 cm³',
       description: 'Lower lumbar vertebral column and pelvic girdle.'
     }
+  ],
+
+  fullbody: [
+    {
+      id: 'brain_cortex',
+      name: 'Cerebrum & Cranium',
+      category: 'Neuro',
+      color: '#38BDF8',
+      borderCss: 'border-sky-400/80',
+      bgCss: 'bg-sky-500/10 text-sky-300',
+      dotCss: 'bg-sky-400',
+      pos: { x: 0.0, y: 0.65, z: 0.10 },
+      labelPos: { x: 22, y: 15 },
+      huRange: '25 to 45 HU',
+      volume: '1,150 cm³',
+      description: 'Cranial vault containing motor, sensory, and cerebral cortex networks.'
+    },
+    {
+      id: 'cervical_thoracic_spine',
+      name: 'Spine & Vertebrae',
+      category: 'Skeletal',
+      color: '#F59E0B',
+      borderCss: 'border-amber-400/80',
+      bgCss: 'bg-amber-500/10 text-amber-300',
+      dotCss: 'bg-amber-400',
+      pos: { x: 0.0, y: 0.10, z: -0.20 },
+      labelPos: { x: 78, y: 25 },
+      huRange: '300 to 1100 HU',
+      volume: '890 cm³',
+      description: 'Complete spinal axial skeleton extending from cervical C1 to lumbar L5.'
+    },
+    {
+      id: 'pulmonary_system',
+      name: 'Lungs & Thoracic Cavity',
+      category: 'Pulmonary',
+      color: '#0D9488',
+      borderCss: 'border-teal-400/80',
+      bgCss: 'bg-teal-500/10 text-teal-300',
+      dotCss: 'bg-teal-400',
+      pos: { x: -0.22, y: 0.30, z: 0.08 },
+      labelPos: { x: 18, y: 38 },
+      huRange: '-800 to -500 HU',
+      volume: '2,700 cm³',
+      description: 'Bilateral lung parenchyma and bronchial airway structures.'
+    },
+    {
+      id: 'cardiovascular',
+      name: 'Heart & Aorta Network',
+      category: 'Cardiovascular',
+      color: '#E11D48',
+      borderCss: 'border-rose-400/80',
+      bgCss: 'bg-rose-500/10 text-rose-300',
+      dotCss: 'bg-rose-400',
+      pos: { x: 0.08, y: 0.18, z: 0.15 },
+      labelPos: { x: 80, y: 50 },
+      huRange: '35 to 220 HU',
+      volume: '850 cm³',
+      description: 'Thoraco-abdominal vascular tree including cardiac chambers and aorta.'
+    },
+    {
+      id: 'hepatic_renal',
+      name: 'Liver & Kidneys',
+      category: 'Abdominal Viscera',
+      color: '#F97316',
+      borderCss: 'border-orange-400/80',
+      bgCss: 'bg-orange-500/10 text-orange-300',
+      dotCss: 'bg-orange-400',
+      pos: { x: -0.25, y: -0.15, z: 0.08 },
+      labelPos: { x: 20, y: 70 },
+      huRange: '30 to 70 HU',
+      volume: '1,970 cm³',
+      description: 'Major abdominal organs including liver segments and bilateral kidneys.'
+    },
+    {
+      id: 'pelvis_limbs',
+      name: 'Pelvic Girdle & Femurs',
+      category: 'Musculoskeletal',
+      color: '#A855F7',
+      borderCss: 'border-purple-400/80',
+      bgCss: 'bg-purple-500/10 text-purple-300',
+      dotCss: 'bg-purple-400',
+      pos: { x: 0.0, y: -0.55, z: 0.05 },
+      labelPos: { x: 75, y: 85 },
+      huRange: '250 to 1200 HU',
+      volume: '1,240 cm³',
+      description: 'Pelvic girdle structures and lower extremity bony skeletal framework.'
+    }
   ]
 };
 
@@ -303,6 +390,25 @@ export default function OrganSegmentationViewer({
     const sUrl = (snapshotUrl || '').toLowerCase();
 
     const combinedStr = `${bp} ${diag} ${mUrl} ${sUrl}`;
+
+    // 0. Full Body / Multi-organ indicators
+    if (
+      combinedStr.includes('fullbody') ||
+      combinedStr.includes('full_body') ||
+      combinedStr.includes('full body') ||
+      combinedStr.includes('wholebody') ||
+      combinedStr.includes('whole_body') ||
+      combinedStr.includes('whole body') ||
+      combinedStr.includes('multi-organ') ||
+      combinedStr.includes('multiorgan') ||
+      combinedStr.includes('torso') ||
+      combinedStr.includes('totalbody') ||
+      combinedStr.includes('full_scan') ||
+      combinedStr.includes('full scan') ||
+      combinedStr.includes('body_scan')
+    ) {
+      return 'fullbody';
+    }
 
     // 1. Brain / Head / Skull / Neuro / Tumor / Neck indicators
     if (
@@ -360,6 +466,10 @@ export default function OrganSegmentationViewer({
       if (!pathologyFinding || pathologyFinding.toLowerCase().includes('lung') || pathologyFinding.toLowerCase().includes('brain')) {
         pathologyFinding = 'Abdominal Focal Lesion / Mass';
       }
+    } else if (activeRegion === 'fullbody') {
+      if (!pathologyFinding) {
+        pathologyFinding = 'Systemic Multi-Organ Focal Lesion';
+      }
     } else {
       if (!pathologyFinding) {
         pathologyFinding = 'Pulmonary Nodule / Lung Mass';
@@ -381,6 +491,8 @@ export default function OrganSegmentationViewer({
         ? { x: 0.12, y: 0.22, z: 0.18 }
         : activeRegion === 'abdomen'
         ? { x: -0.22, y: 0.12, z: 0.08 }
+        : activeRegion === 'fullbody'
+        ? { x: -0.15, y: 0.20, z: 0.10 }
         : { x: -0.26, y: 0.14, z: 0.12 },
       labelPos: { x: 42, y: 32 },
       huRange: activeRegion === 'brain' ? '+28 to +65 HU (Intracranial Mass)' : '+38 to +85 HU (Pathological Focal Mass)',
@@ -659,6 +771,15 @@ export default function OrganSegmentationViewer({
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {/* Anatomical Region Buttons */}
           <div className="flex items-center space-x-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
+            <button
+              onClick={() => setActiveRegion('fullbody')}
+              className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeRegion === 'fullbody' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Full Body</span>
+            </button>
             <button
               onClick={() => setActiveRegion('brain')}
               className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1.5 ${

@@ -65,6 +65,15 @@ export default function UploadZone({
 
   const sampleDatasets = [
     {
+      name: 'Full Body Multi-Organ CT',
+      modality: 'CT',
+      slices: 340,
+      size: '48.6 MB',
+      finding: 'Systemic Multi-Organ Scan',
+      tag: 'Full Body',
+      bodyPart: 'FullBody'
+    },
+    {
       name: 'Chest CT Nodule Series',
       modality: 'CT',
       slices: 195,
