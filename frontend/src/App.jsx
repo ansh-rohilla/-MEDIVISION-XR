@@ -13,6 +13,7 @@ import OrganSegmentationViewer from './components/OrganSegmentationViewer';
 import AiDiagnosticCard from './components/AiDiagnosticCard';
 import AiDiagnosticDetails from './components/AiDiagnosticDetails';
 import AccuracyComparison from './components/AccuracyComparison';
+import Footer from './components/Footer';
 import OrganLabels from './OrganLabels';
 import ScanMetadata from './ScanMetadata';
 
@@ -737,6 +738,9 @@ function App() {
 
         </main>
       </div>
+
+      {/* Platform Global Footer */}
+      <Footer activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Login & Registration Auth Modal */}
       <AuthModal
