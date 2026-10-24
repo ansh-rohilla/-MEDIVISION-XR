@@ -23,67 +23,12 @@ import {
   UserCheck
 } from 'lucide-react';
 
-export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }) {
-  const [activePreset, setActivePreset] = useState('chest');
-
+export default function HeroSection({ onStartUpload, onInspectSession, onNavigateTab }) {
   const stats = [
     { label: 'Volumetric DICOM Slices', value: '250,000+', desc: 'Processed DICOM frames', icon: Layers, trend: '+14% this week', color: 'from-blue-500 to-cyan-500' },
     { label: 'Diagnostic AI Accuracy', value: '99.4%', desc: '3D ResNet MedicalNet', icon: Brain, trend: 'Benchmark Leader', color: 'from-purple-500 to-indigo-500' },
     { label: '3D Render Throughput', value: '60 FPS', desc: 'WebGL GPU Hardware Accelerated', icon: Zap, trend: 'Ultra Low Latency', color: 'from-amber-500 to-orange-500' },
     { label: 'Healthcare Compliance', value: 'Part 10', desc: 'HIPAA & PACS Compliant', icon: ShieldCheck, trend: 'Encrypted & Secure', color: 'from-emerald-500 to-teal-500' },
-  ];
-
-  const presets = [
-    {
-      id: 'fullbody',
-      title: 'Full Body & Torso CT',
-      bodyPart: 'FullBody',
-      slices: 340,
-      modality: 'CT',
-      desc: 'Systemic multi-organ segmentation covering head, chest, abdomen, spine & pelvic girdle.',
-      tag: 'Full Scan 3D',
-      color: 'border-indigo-500 bg-indigo-50/40 text-indigo-700'
-    },
-    {
-      id: 'chest',
-      title: 'Chest & Pulmonary CT',
-      bodyPart: 'Chest',
-      slices: 195,
-      modality: 'CT',
-      desc: 'Pulmonary nodule detection, bronchial tree mapping & lung parenchyma volumetric segmentation.',
-      tag: 'Most Popular',
-      color: 'border-brand-500 bg-brand-50/40 text-brand-700'
-    },
-    {
-      id: 'abdomen',
-      title: 'Abdomen & Viscera Scan',
-      bodyPart: 'Abdomen',
-      slices: 120,
-      modality: 'CT',
-      desc: 'Liver, spleen, and renal organ boundary segmentation with HU soft tissue windowing.',
-      tag: 'Multi-Organ',
-      color: 'border-emerald-500 bg-emerald-50/40 text-emerald-700'
-    },
-    {
-      id: 'brain',
-      title: 'Brain & Cranial MRI',
-      bodyPart: 'Brain',
-      slices: 210,
-      modality: 'MRI',
-      desc: 'High-resolution cortical surface extraction, ventricular volume rendering & lesion isolation.',
-      tag: 'Neural 3D',
-      color: 'border-purple-500 bg-purple-50/40 text-purple-700'
-    },
-    {
-      id: 'neck',
-      title: 'Cervical & Neck Region',
-      bodyPart: 'HumanNeck',
-      slices: 95,
-      modality: 'CT',
-      desc: 'Thyroid gland isolation, cervical spine alignment & carotid vascular structure mapping.',
-      tag: 'Spinal / Vascular',
-      color: 'border-amber-500 bg-amber-50/40 text-amber-700'
-    }
   ];
 
   const features = [
@@ -254,16 +199,6 @@ export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }
               <span>Upload DICOM Series</span>
               <ArrowRight className="w-4 h-4 ml-0.5" />
             </button>
-
-            {onOpenDemo && (
-              <button
-                onClick={onOpenDemo}
-                className="flex items-center space-x-2.5 px-6 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-extrabold backdrop-blur transition-all hover:scale-[1.02]"
-              >
-                <Box className="w-4 h-4 text-brand-300" />
-                <span>Explore Sample 3D Dataset</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -288,66 +223,6 @@ export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }
             </div>
           );
         })}
-      </div>
-
-      {/* Preset Dataset Anatomical Selector */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Database className="w-5 h-5 text-brand-700" />
-              <span>Anatomical Dataset Presets & Organ Library</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">Quickly preview pre-segmented volumetric DICOM datasets</p>
-          </div>
-
-          {onOpenDemo && (
-            <button
-              onClick={onOpenDemo}
-              className="px-4 py-2 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold border border-brand-200 transition-all flex items-center space-x-1.5 self-start sm:self-auto"
-            >
-              <Eye className="w-3.5 h-3.5" />
-              <span>Load Interactive Demo</span>
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {presets.map((preset) => (
-            <div
-              key={preset.id}
-              onClick={() => {
-                setActivePreset(preset.id);
-                if (onOpenDemo) onOpenDemo();
-              }}
-              className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer space-y-3 flex flex-col justify-between ${
-                activePreset === preset.id 
-                  ? 'bg-gradient-to-br from-brand-50/50 to-white border-brand-400 shadow-md ring-2 ring-brand-500/20' 
-                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/60'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-white border border-slate-200 text-slate-700 shadow-2xs">
-                    {preset.modality}
-                  </span>
-                  <span className="text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-200">
-                    {preset.tag}
-                  </span>
-                </div>
-                <h4 className="text-sm font-bold text-slate-900">{preset.title}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed mt-1">{preset.desc}</p>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
-                <span className="font-mono text-slate-500 text-[11px]">{preset.slices} Slices</span>
-                <span className="text-brand-700 font-bold text-[11px] flex items-center group-hover:translate-x-0.5 transition-transform">
-                  Inspect <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Core Platform Capabilities Grid */}
@@ -486,7 +361,7 @@ export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }
                   </td>
                   <td className="py-3.5 px-3 text-right">
                     <button
-                      onClick={onOpenDemo}
+                      onClick={() => onInspectSession ? onInspectSession(row) : onStartUpload()}
                       className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-brand-700 text-white text-[11px] font-bold transition-all shadow-xs inline-flex items-center space-x-1"
                     >
                       <span>Inspect 3D</span>

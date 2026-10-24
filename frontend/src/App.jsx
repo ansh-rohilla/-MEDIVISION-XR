@@ -664,7 +664,13 @@ function App() {
           {activeTab === 'overview' && (
             <HeroSection
               onStartUpload={() => setActiveTab('upload')}
-              onOpenDemo={loadDemoData}
+              onInspectSession={() => {
+                if (sliceUrls.length > 0) {
+                  setActiveTab('volume3d');
+                } else {
+                  setActiveTab('upload');
+                }
+              }}
             />
           )}
 
@@ -676,7 +682,6 @@ function App() {
               uploadProgress={processingProgress}
               processingStatus={{ stage: processingStage }}
               error={error}
-              onOpenDemo={loadDemoData}
             />
           )}
 

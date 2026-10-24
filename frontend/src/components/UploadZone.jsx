@@ -24,8 +24,7 @@ export default function UploadZone({
   isUploading, 
   uploadProgress, 
   processingStatus,
-  error,
-  onOpenDemo
+  error
 }) {
   const [dragActive, setDragActive] = useState(false);
   const zipInputRef = useRef(null);
@@ -61,54 +60,6 @@ export default function UploadZone({
     { label: 'Decompress DICOM' },
     { label: '3D Reconstruction' },
     { label: 'AI Inference Completed' },
-  ];
-
-  const sampleDatasets = [
-    {
-      name: 'Full Body Multi-Organ CT',
-      modality: 'CT',
-      slices: 340,
-      size: '48.6 MB',
-      finding: 'Systemic Multi-Organ Scan',
-      tag: 'Full Body',
-      bodyPart: 'FullBody'
-    },
-    {
-      name: 'Chest CT Nodule Series',
-      modality: 'CT',
-      slices: 195,
-      size: '24.5 MB',
-      finding: 'Pulmonary Nodule / Pneumonia',
-      tag: 'Recommended',
-      bodyPart: 'Chest'
-    },
-    {
-      name: 'Abdominal Soft Tissue CT',
-      modality: 'CT',
-      slices: 120,
-      size: '18.2 MB',
-      finding: 'Normal Abdominal Viscera',
-      tag: 'Multi-Organ',
-      bodyPart: 'Abdomen'
-    },
-    {
-      name: 'Brain Cranial MRI Scan',
-      modality: 'MRI',
-      slices: 210,
-      size: '32.1 MB',
-      finding: 'Cortical Ventricular Surface',
-      tag: 'Neural 3D',
-      bodyPart: 'Brain'
-    },
-    {
-      name: 'Human Neck Vertebrae CT',
-      modality: 'CT',
-      slices: 95,
-      size: '14.8 MB',
-      finding: 'Cervical Spine & Thyroid',
-      tag: 'Vascular',
-      bodyPart: 'HumanNeck'
-    }
   ];
 
   const pipelinePhases = [
@@ -301,60 +252,7 @@ export default function UploadZone({
 
       </div>
 
-      {/* 2. One-Click Sample Clinical DICOM Datasets */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Database className="w-5 h-5 text-brand-700" />
-              <span>One-Click Clinical DICOM Test Datasets</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">Test 3D reconstruction and AI classification instantly without uploading local files</p>
-          </div>
-
-          {onOpenDemo && (
-            <button
-              onClick={onOpenDemo}
-              className="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-bold shadow-sm transition-all flex items-center space-x-1.5 self-start sm:self-auto"
-            >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>Load Default Sample Dataset</span>
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {sampleDatasets.map((sample, idx) => (
-            <div
-              key={idx}
-              onClick={onOpenDemo}
-              className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-brand-300 hover:bg-slate-100/60 transition-all duration-200 cursor-pointer space-y-3 flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-white border border-slate-200 text-slate-700">
-                    {sample.modality}
-                  </span>
-                  <span className="text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-200">
-                    {sample.tag}
-                  </span>
-                </div>
-                <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-brand-700 transition-colors">{sample.name}</h4>
-                <p className="text-[11px] text-slate-500 mt-1 font-medium">{sample.finding}</p>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
-                <span className="font-mono text-slate-500 text-[11px]">{sample.slices} Slices ({sample.size})</span>
-                <span className="text-brand-700 font-bold text-[11px] flex items-center group-hover:translate-x-0.5 transition-transform">
-                  Load <ArrowRight className="w-3 h-3 ml-0.5" />
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 3. Technical Specifications & DICOM 3.0 De-identification Checklist */}
+      {/* 2. Technical Specifications & DICOM 3.0 De-identification Checklist */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Specifications */}
