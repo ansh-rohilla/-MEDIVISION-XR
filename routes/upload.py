@@ -197,8 +197,8 @@ def collect_dicom_root(upload_root):
 
 @api_bp.route('/upload', methods=['POST'])
 def upload():
-    if not get_uid_from_request():
-        return jsonify({"error": "unauthenticated"}), 401
+    # Support guest and authenticated uploads
+    uid = get_uid_from_request()
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     static_dir = current_app.static_folder
     session_id = str(uuid.uuid4())
@@ -277,8 +277,7 @@ def upload():
 
 @api_bp.route('/upload/status/<session_id>', methods=['GET'])
 def upload_status(session_id):
-    if not get_uid_from_request():
-        return jsonify({"error": "unauthenticated"}), 401
+    uid = get_uid_from_request()
     
     print(f"Status check for session: {session_id}")
     print(f"Available sessions: {list(processing_status.keys())}")
@@ -307,8 +306,7 @@ def upload_status(session_id):
 
 @api_bp.route('/open_interactive', methods=['POST'])
 def open_interactive():
-    if not get_uid_from_request():
-        return jsonify({"error": "unauthenticated"}), 401
+    uid = get_uid_from_request()
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     static_dir = current_app.static_folder
     data = request.get_json(silent=True) or {}
@@ -340,8 +338,7 @@ def open_interactive():
 
 @api_bp.route('/evaluate', methods=['POST'])
 def evaluate():
-    if not get_uid_from_request():
-        return jsonify({"error": "unauthenticated"}), 401
+    uid = get_uid_from_request()
     data = request.get_json(silent=True) or {}
     session_id = data.get('session_id')
     if not session_id:

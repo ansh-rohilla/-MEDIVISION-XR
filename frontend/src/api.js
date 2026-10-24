@@ -136,7 +136,7 @@ export const api = {
               errorMessage = `${errorData.error}${errorData.details ? ': ' + errorData.details : ''}`;
             }
           } else if (errorData.error) {
-            errorMessage = errorData.error;
+            errorMessage = errorData.error === 'unauthenticated' ? 'Authentication required. Please sign in or use guest mode.' : errorData.error;
           }
         } catch {
           console.log('12. Failed to parse error as JSON');
