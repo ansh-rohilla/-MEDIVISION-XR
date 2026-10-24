@@ -25,13 +25,13 @@ export default function Dicom2DViewer({
 
   if (!sliceUrls || sliceUrls.length === 0) {
     return (
-      <div className="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-4 shadow-card">
-        <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+      <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-4 shadow-card transition-colors duration-200">
+        <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto">
           <Layers className="w-6 h-6" />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-slate-800">No 2D Slices Available</h3>
-          <p className="text-xs text-slate-500 mt-1">Please upload a DICOM scan series to inspect multiplanar reconstruction slices.</p>
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">No 2D Slices Available</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Please upload a DICOM scan series to inspect multiplanar reconstruction slices.</p>
         </div>
       </div>
     );

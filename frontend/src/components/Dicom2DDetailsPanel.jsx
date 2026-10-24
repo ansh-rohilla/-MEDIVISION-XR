@@ -50,14 +50,14 @@ export default function Dicom2DDetailsPanel({
     <div className="space-y-6 pt-2">
       
       {/* 1. Hounsfield Unit (HU) Histogram & Window Level Controls */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-6 transition-colors duration-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800/80">
           <div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-brand-700" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Sliders className="w-5 h-5 text-brand-700 dark:text-brand-400" />
               <span>Pixel Intensity & Hounsfield Unit (HU) Calibration</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Live HU distribution curve for Frame #{currentSliceIdx + 1} of {totalSlices}
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function Dicom2DDetailsPanel({
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                   activeWindow === preset.id
                     ? 'bg-brand-700 text-white border-brand-700 shadow-md shadow-brand-500/20'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
                 {preset.name}
@@ -94,27 +94,27 @@ export default function Dicom2DDetailsPanel({
           </div>
 
           {/* HU Reference Ranges */}
-          <div className="space-y-2.5 bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-xs">
-            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Radiodensity References</h4>
+          <div className="space-y-2.5 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-xs">
+            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2">Radiodensity References</h4>
 
-            <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200">
-              <span className="text-slate-500 font-medium">Air / Lung Parenchyma</span>
-              <span className="font-mono font-bold text-slate-900">-1000 to -500 HU</span>
+            <div className="flex justify-between items-center p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Air / Lung Parenchyma</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white">-1000 to -500 HU</span>
             </div>
 
-            <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200">
-              <span className="text-slate-500 font-medium">Fat & Soft Tissue</span>
-              <span className="font-mono font-bold text-brand-700">-100 to +80 HU</span>
+            <div className="flex justify-between items-center p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Fat & Soft Tissue</span>
+              <span className="font-mono font-bold text-brand-700 dark:text-brand-400">-100 to +80 HU</span>
             </div>
 
-            <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200">
-              <span className="text-slate-500 font-medium">Blood & Contrast</span>
-              <span className="font-mono font-bold text-purple-700">+30 to +150 HU</span>
+            <div className="flex justify-between items-center p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Blood & Contrast</span>
+              <span className="font-mono font-bold text-purple-700 dark:text-purple-400">+30 to +150 HU</span>
             </div>
 
-            <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200">
-              <span className="text-slate-500 font-medium">Cortical Bone</span>
-              <span className="font-mono font-bold text-slate-900">+400 to +1000 HU</span>
+            <div className="flex justify-between items-center p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Cortical Bone</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white">+400 to +1000 HU</span>
             </div>
           </div>
         </div>
@@ -124,54 +124,54 @@ export default function Dicom2DDetailsPanel({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* DICOM Header Metadata Table */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-4">
+        <div className="lg:col-span-2 bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-4 transition-colors duration-200">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-brand-700" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 text-brand-700 dark:text-brand-400" />
               <span>DICOM Acquisition & Tag Header Specification</span>
             </h3>
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800/60">
               Part 10 Standard
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs pt-1">
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Imaging Modality</span>
-              <p className="font-mono font-extrabold text-slate-900 mt-0.5">CT (Computed Tomography)</p>
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Imaging Modality</span>
+              <p className="font-mono font-extrabold text-slate-900 dark:text-slate-100 mt-0.5">CT (Computed Tomography)</p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Voxel Matrix</span>
-              <p className="font-mono font-extrabold text-brand-700 mt-0.5">512 x 512 x {totalSlices}</p>
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Voxel Matrix</span>
+              <p className="font-mono font-extrabold text-brand-700 dark:text-brand-400 mt-0.5">512 x 512 x {totalSlices}</p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Slice Thickness</span>
-              <p className="font-mono font-extrabold text-slate-900 mt-0.5">1.25 mm</p>
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Slice Thickness</span>
+              <p className="font-mono font-extrabold text-slate-900 dark:text-slate-100 mt-0.5">1.25 mm</p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Pixel Spacing (dX, dY)</span>
-              <p className="font-mono font-extrabold text-slate-900 mt-0.5">0.703 mm x 0.703 mm</p>
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Pixel Spacing (dX, dY)</span>
+              <p className="font-mono font-extrabold text-slate-900 dark:text-slate-100 mt-0.5">0.703 mm x 0.703 mm</p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">KVP / Tube Current</span>
-              <p className="font-mono font-extrabold text-purple-700 mt-0.5">120 kV / 200 mA</p>
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">KVP / Tube Current</span>
+              <p className="font-mono font-extrabold text-purple-700 dark:text-purple-400 mt-0.5">120 kV / 200 mA</p>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Patient Orientation</span>
-              <p className="font-mono font-extrabold text-slate-900 mt-0.5">Axial (R-L, A-P)</p>
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Patient Orientation</span>
+              <p className="font-mono font-extrabold text-slate-900 dark:text-slate-100 mt-0.5">Axial (R-L, A-P)</p>
             </div>
           </div>
         </div>
 
         {/* Key Anatomical Landmarks Jumpers */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-4">
-          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Target className="w-5 h-5 text-brand-700" />
+        <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-4 transition-colors duration-200">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Target className="w-5 h-5 text-brand-700 dark:text-brand-400" />
             <span>Key Anatomical Landmarks</span>
           </h3>
 
@@ -179,17 +179,17 @@ export default function Dicom2DDetailsPanel({
             {landmarks.map((lm, idx) => (
               <div 
                 key={idx}
-                className="p-3 rounded-2xl bg-slate-50/70 border border-slate-200/80 flex items-center justify-between hover:border-brand-300 transition-colors"
+                className="p-3 rounded-2xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between hover:border-brand-300 dark:hover:border-brand-500 transition-colors"
               >
                 <div>
-                  <p className="font-bold text-slate-900">{lm.name}</p>
-                  <p className="text-[11px] font-mono text-slate-500 mt-0.5">Target Frame: Slice #{lm.slice}</p>
+                  <p className="font-bold text-slate-900 dark:text-white">{lm.name}</p>
+                  <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">Target Frame: Slice #{lm.slice}</p>
                 </div>
 
                 {onSliceChange && (
                   <button
                     onClick={() => onSliceChange(lm.slice - 1)}
-                    className="px-2.5 py-1 rounded-xl bg-white border border-slate-200 hover:border-brand-400 text-brand-700 font-bold text-[11px] shadow-2xs transition-all shrink-0"
+                    className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-400 text-brand-700 dark:text-brand-400 font-bold text-[11px] shadow-2xs transition-all shrink-0"
                   >
                     Jump
                   </button>

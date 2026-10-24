@@ -89,21 +89,21 @@ export default function AiDiagnosticDetails({
     <div className="space-y-6 pt-2">
       
       {/* 1. Volumetric Feature Profile & Slice Confidence Graph */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-6 transition-colors duration-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800/80">
           <div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-brand-700" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-brand-700 dark:text-brand-400" />
               <span>Volumetric Feature Confidence (Z-Axis Profile)</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               3D Convolutional activation responses across slice depth (Slices #1 to #20)
             </p>
           </div>
 
           <div className="flex items-center space-x-2">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5 mr-1 text-purple-600" /> Peak Lesion: Slice #10 (95%)
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 text-xs font-bold">
+              <Sparkles className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" /> Peak Lesion: Slice #10 (95%)
             </span>
           </div>
         </div>
@@ -122,40 +122,40 @@ export default function AiDiagnosticDetails({
           </div>
 
           {/* Quick Metrics Panel */}
-          <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
-            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Spatial Localization</h4>
+          <div className="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2">Spatial Localization</h4>
             
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-slate-500 font-medium">Lesion Centroid</span>
-              <span className="font-mono font-bold text-slate-900">(X: 184, Y: 212, Z: 42)</span>
+            <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Lesion Centroid</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white">(X: 184, Y: 212, Z: 42)</span>
             </div>
 
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-slate-500 font-medium">Max Diameter</span>
-              <span className="font-mono font-bold text-brand-700">14.2 mm</span>
+            <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Max Diameter</span>
+              <span className="font-mono font-bold text-brand-700 dark:text-brand-400">14.2 mm</span>
             </div>
 
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-slate-500 font-medium">Radiomic SUV Max</span>
-              <span className="font-mono font-bold text-purple-700">4.85 g/mL</span>
+            <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Radiomic SUV Max</span>
+              <span className="font-mono font-bold text-purple-700 dark:text-purple-400">4.85 g/mL</span>
             </div>
 
-            <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-slate-500 font-medium">Volume Extent</span>
-              <span className="font-mono font-bold text-slate-900">1.84 cm³</span>
+            <div className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Volume Extent</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white">1.84 cm³</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* 2. Organ & Anatomic Region Segmentation Breakdown */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-6">
+      <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-6 transition-colors duration-200">
         <div>
-          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Layers className="w-5 h-5 text-brand-700" />
+          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Layers className="w-5 h-5 text-brand-700 dark:text-brand-400" />
             <span>Anatomic Region & Tissue Segmentation Breakdown</span>
           </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Detailed radiomic density analysis and AI risk scores per organ sub-region
           </p>
         </div>
@@ -168,39 +168,39 @@ export default function AiDiagnosticDetails({
               onClick={() => setSelectedRegion(region.id)}
               className={`p-3 rounded-2xl border text-left transition-all ${
                 selectedRegion === region.id
-                  ? 'bg-brand-50/80 border-brand-300 ring-2 ring-brand-500/20 shadow-sm'
-                  : 'bg-slate-50/50 border-slate-200 hover:bg-slate-100/70'
+                  ? 'bg-brand-50/80 dark:bg-brand-950/60 border-brand-300 dark:border-brand-500 ring-2 ring-brand-500/20 shadow-sm'
+                  : 'bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
               }`}
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{region.category}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{region.category}</span>
                 <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${region.statusColor}`}>
                   {region.riskPct}% Risk
                 </span>
               </div>
-              <h4 className="text-xs font-bold text-slate-900 truncate">{region.name}</h4>
-              <p className="text-[11px] font-mono text-slate-500 mt-1">{region.volume}</p>
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{region.name}</h4>
+              <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-1">{region.volume}</p>
             </button>
           ))}
         </div>
 
         {/* Selected Region Detailed Card */}
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-brand-50/20 border border-slate-200 space-y-4">
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-brand-50/20 dark:from-slate-900/50 dark:to-brand-950/20 border border-slate-200 dark:border-slate-800 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${activeRegion.statusColor}`}>
                 {activeRegion.status}
               </span>
-              <h4 className="text-base font-extrabold text-slate-900 mt-1">{activeRegion.name}</h4>
+              <h4 className="text-base font-extrabold text-slate-900 dark:text-white mt-1">{activeRegion.name}</h4>
             </div>
 
             <div className="flex items-center space-x-3">
               {onNavigateTo2D && (
                 <button
                   onClick={onNavigateTo2D}
-                  className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold flex items-center space-x-1.5 shadow-sm transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center space-x-1.5 shadow-sm transition-all"
                 >
-                  <Eye className="w-3.5 h-3.5 text-brand-600" />
+                  <Eye className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
                   <span>Jump to {activeRegion.targetSlice ? `Slice #${activeRegion.targetSlice}` : '2D Viewer'}</span>
                 </button>
               )}
@@ -216,27 +216,27 @@ export default function AiDiagnosticDetails({
             </div>
           </div>
 
-          <p className="text-xs text-slate-600 leading-relaxed bg-white p-3 rounded-xl border border-slate-200/80">
-            <strong className="text-slate-800 font-bold">Clinical Insight: </strong>
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700">
+            <strong className="text-slate-800 dark:text-white font-bold">Clinical Insight: </strong>
             {activeRegion.recommendation}
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 text-xs">
-            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Tissue Density</span>
-              <p className="font-mono font-extrabold text-slate-900 mt-0.5">{activeRegion.density}</p>
+            <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Tissue Density</span>
+              <p className="font-mono font-extrabold text-slate-900 dark:text-white mt-0.5">{activeRegion.density}</p>
             </div>
-            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Estimated Volume</span>
-              <p className="font-mono font-extrabold text-brand-700 mt-0.5">{activeRegion.volume}</p>
+            <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Estimated Volume</span>
+              <p className="font-mono font-extrabold text-brand-700 dark:text-brand-400 mt-0.5">{activeRegion.volume}</p>
             </div>
-            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Slice Span</span>
-              <p className="font-mono font-extrabold text-slate-900 mt-0.5">{activeRegion.sliceRange}</p>
+            <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Slice Span</span>
+              <p className="font-mono font-extrabold text-slate-900 dark:text-white mt-0.5">{activeRegion.sliceRange}</p>
             </div>
-            <div className="p-2.5 rounded-xl bg-white border border-slate-200">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">AI Malignancy Risk</span>
-              <p className="font-mono font-extrabold text-rose-600 mt-0.5">{activeRegion.riskPct}%</p>
+            <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">AI Malignancy Risk</span>
+              <p className="font-mono font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">{activeRegion.riskPct}%</p>
             </div>
           </div>
         </div>

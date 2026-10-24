@@ -100,29 +100,29 @@ export default function UploadZone({
     <div className="space-y-8 py-2">
       
       {/* 1. Main Drag & Drop / Upload Card */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-6">
+      <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-6 transition-colors duration-200">
         
         {/* Title & Guidelines */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/80 pb-4">
           <div>
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <UploadCloud className="w-5 h-5 text-brand-700" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <UploadCloud className="w-5 h-5 text-brand-700 dark:text-brand-400" />
               <span>DICOM Scan Ingestion Pipeline</span>
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Upload DICOM volumetric series (`.dcm`, `.nii`), compressed ZIP archives, or raw folders.
             </p>
           </div>
 
           {/* Format Badges */}
           <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-mono font-bold text-slate-700">
+            <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300">
               .ZIP
             </span>
-            <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-mono font-bold text-slate-700">
+            <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300">
               .DCM
             </span>
-            <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-mono font-bold text-slate-700">
+            <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300">
               .NII
             </span>
           </div>
@@ -130,10 +130,10 @@ export default function UploadZone({
 
         {/* Error Alert */}
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-3 shadow-xs">
+          <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-xs font-medium flex items-start gap-3 shadow-xs">
             <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-rose-900">Upload Processing Notice</p>
+              <p className="font-bold text-rose-900 dark:text-rose-200">Upload Processing Notice</p>
               <p className="mt-0.5">{error}</p>
             </div>
           </div>
@@ -141,16 +141,16 @@ export default function UploadZone({
 
         {/* Upload Drag & Drop View vs Progress View */}
         {isUploading || (processingStatus && processingStatus.status === 'processing') ? (
-          <div className="p-8 md:p-12 rounded-2xl bg-gradient-to-br from-slate-50 to-brand-50/20 border border-slate-200 flex flex-col items-center justify-center space-y-6">
+          <div className="p-8 md:p-12 rounded-2xl bg-gradient-to-br from-slate-50 to-brand-50/20 dark:from-slate-900/60 dark:to-brand-950/20 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center space-y-6">
             <div className="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/20">
               <Loader2 className="w-7 h-7 animate-spin" />
             </div>
 
             <div className="text-center space-y-1">
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Processing Volumetric DICOM Series...
               </h3>
-              <p className="text-xs text-brand-700 font-mono font-semibold">
+              <p className="text-xs text-brand-700 dark:text-brand-400 font-mono font-semibold">
                 {processingStatus?.stage || 'Uploading files to server...'}
               </p>
             </div>
@@ -167,11 +167,11 @@ export default function UploadZone({
                         ? 'bg-emerald-600 text-white' 
                         : isCurrent 
                         ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20 ring-4 ring-brand-500/20' 
-                        : 'bg-slate-200 text-slate-500'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                     }`}>
                       {isDone ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
                     </div>
-                    <span className={`text-[10px] font-medium ${isCurrent ? 'text-brand-700 font-extrabold' : 'text-slate-500'}`}>
+                    <span className={`text-[10px] font-medium ${isCurrent ? 'text-brand-700 dark:text-brand-400 font-extrabold' : 'text-slate-500 dark:text-slate-400'}`}>
                       {st.label}
                     </span>
                   </div>
@@ -187,8 +187,8 @@ export default function UploadZone({
             onDrop={handleDrop}
             className={`p-10 md:p-14 rounded-2xl border-2 border-dashed transition-all text-center flex flex-col items-center justify-center space-y-5 cursor-pointer ${
               dragActive 
-                ? 'border-brand-500 bg-brand-50/60 scale-[1.005]' 
-                : 'border-slate-300 hover:border-brand-400 bg-slate-50/50 hover:bg-slate-50'
+                ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-950/40 scale-[1.005]' 
+                : 'border-slate-300 dark:border-slate-700 hover:border-brand-400 dark:hover:border-brand-500 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-900/50'
             }`}
           >
             <input
@@ -207,15 +207,15 @@ export default function UploadZone({
               className="hidden"
             />
 
-            <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-700 border border-brand-200 flex items-center justify-center shadow-xs">
+            <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-400 border border-brand-200 dark:border-brand-800 flex items-center justify-center shadow-xs">
               <FolderArchive className="w-7 h-7" />
             </div>
 
             <div className="space-y-1 max-w-md">
-              <p className="text-base font-bold text-slate-900">
+              <p className="text-base font-bold text-slate-900 dark:text-white">
                 Drag & Drop DICOM Series or Archives Here
               </p>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 Supports standard multi-slice DICOM folders, `.dcm` files, or compressed `.zip` packages up to 500MB
               </p>
             </div>
@@ -233,9 +233,9 @@ export default function UploadZone({
               <button
                 type="button"
                 onClick={() => folderInputRef.current?.click()}
-                className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs font-bold transition-all flex items-center gap-2 shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-bold transition-all flex items-center gap-2 shadow-xs"
               >
-                <Box className="w-4 h-4 text-slate-600" />
+                <Box className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                 <span>Select DICOM Folder</span>
               </button>
             </div>
@@ -243,11 +243,11 @@ export default function UploadZone({
         )}
 
         {/* Security & HIPAA Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 pt-3 border-t border-slate-100">
-          <span className="flex items-center gap-1.5 text-slate-700 font-semibold">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" /> End-to-End HIPAA De-identification & Anonymization
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+          <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-semibold">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> End-to-End HIPAA De-identification & Anonymization
           </span>
-          <span className="font-mono text-[11px] text-slate-400">Max Payload: 500 MB / Series</span>
+          <span className="font-mono text-[11px] text-slate-400 dark:text-slate-500">Max Payload: 500 MB / Series</span>
         </div>
 
       </div>
@@ -256,62 +256,62 @@ export default function UploadZone({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Specifications */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-4">
-          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <FileCode className="w-5 h-5 text-brand-700" />
+        <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-4 transition-colors duration-200">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <FileCode className="w-5 h-5 text-brand-700 dark:text-brand-400" />
             <span>Supported DICOM & Volumetric Specs</span>
           </h3>
 
           <div className="space-y-3 text-xs">
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-start justify-between">
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex items-start justify-between">
               <div>
-                <p className="font-bold text-slate-800">DICOM Part 10 Standards</p>
-                <p className="text-slate-500 text-[11px] mt-0.5">Explicit/Implicit VR Little Endian, JPEG Lossless & Uncompressed Transfer Syntaxes</p>
+                <p className="font-bold text-slate-800 dark:text-slate-200">DICOM Part 10 Standards</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">Explicit/Implicit VR Little Endian, JPEG Lossless & Uncompressed Transfer Syntaxes</p>
               </div>
-              <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] shrink-0">Supported</span>
+              <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 font-bold text-[10px] shrink-0">Supported</span>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-start justify-between">
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex items-start justify-between">
               <div>
-                <p className="font-bold text-slate-800">NIfTI Volumetric Format</p>
-                <p className="text-slate-500 text-[11px] mt-0.5">Single file `.nii` or compressed `.nii.gz` 3D spatial volumes</p>
+                <p className="font-bold text-slate-800 dark:text-slate-200">NIfTI Volumetric Format</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">Single file `.nii` or compressed `.nii.gz` 3D spatial volumes</p>
               </div>
-              <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] shrink-0">Supported</span>
+              <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 font-bold text-[10px] shrink-0">Supported</span>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-start justify-between">
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex items-start justify-between">
               <div>
-                <p className="font-bold text-slate-800">Voxel Spacing & Calibration</p>
-                <p className="text-slate-500 text-[11px] mt-0.5">Automatic extraction of PixelSpacing $(dX, dY)$ and SliceThickness $(dZ)$</p>
+                <p className="font-bold text-slate-800 dark:text-slate-200">Voxel Spacing & Calibration</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">Automatic extraction of PixelSpacing $(dX, dY)$ and SliceThickness $(dZ)$</p>
               </div>
-              <span className="px-2 py-0.5 rounded bg-brand-50 text-brand-700 border border-brand-200 font-bold text-[10px] shrink-0">Auto-Calibrated</span>
+              <span className="px-2 py-0.5 rounded bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-400 border border-brand-200 dark:border-brand-800/60 font-bold text-[10px] shrink-0">Auto-Calibrated</span>
             </div>
           </div>
         </div>
 
         {/* HIPAA Anonymization Checklist */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-4">
-          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-emerald-600" />
+        <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-4 transition-colors duration-200">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Lock className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <span>Automated PHI De-identification Checklist</span>
           </h3>
 
           <div className="space-y-2.5 text-xs">
-            <div className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-slate-700 font-medium">Patient Name `(0010,0010)` scrubbed</span>
+            <div className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-slate-700 dark:text-slate-300 font-medium">Patient Name `(0010,0010)` scrubbed</span>
             </div>
-            <div className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-slate-700 font-medium">Patient ID & SSN `(0010,0020)` randomized</span>
+            <div className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-slate-700 dark:text-slate-300 font-medium">Patient ID & SSN `(0010,0020)` randomized</span>
             </div>
-            <div className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-slate-700 font-medium">Institution & Physician tags sanitized</span>
+            <div className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-slate-700 dark:text-slate-300 font-medium">Institution & Physician tags sanitized</span>
             </div>
-            <div className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-slate-700 font-medium">Voxel intensity & spatial dimensions retained</span>
+            <div className="flex items-center space-x-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-slate-700 dark:text-slate-300 font-medium">Voxel intensity & spatial dimensions retained</span>
             </div>
           </div>
         </div>

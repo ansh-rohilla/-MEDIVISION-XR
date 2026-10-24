@@ -59,17 +59,17 @@ export default function AccuracyComparison() {
       {/* Section Title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-brand-700" />
+          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <BarChart3 className="w-6 h-6 text-brand-700 dark:text-brand-400" />
             <span>AI Model Accuracy & Benchmark Evaluation</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Comparative performance analysis between standard 3D ResNet baseline and transfer-learned MedicalNet architecture.
           </p>
         </div>
 
-        <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
-          <Award className="w-4 h-4 text-emerald-600" />
+        <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+          <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           <span>MedicalNet +3.6% Superior Accuracy</span>
         </div>
       </div>
@@ -81,8 +81,8 @@ export default function AccuracyComparison() {
             key={idx}
             className={`p-6 rounded-3xl border transition-all duration-300 relative overflow-hidden ${
               m.isPrimary 
-                ? 'bg-gradient-to-br from-white via-brand-50/30 to-slate-50 border-brand-300 shadow-card-hover ring-2 ring-brand-500/20' 
-                : 'bg-white border-slate-200 shadow-card'
+                ? 'bg-gradient-to-br from-white via-brand-50/30 to-slate-50 dark:from-[#0B0F19] dark:via-brand-950/20 dark:to-slate-900/40 border-brand-300 dark:border-brand-700 shadow-card-hover ring-2 ring-brand-500/20' 
+                : 'bg-white dark:bg-[#0B0F19] border-slate-200 dark:border-slate-800 shadow-card'
             }`}
           >
             {m.isPrimary && (
@@ -93,56 +93,56 @@ export default function AccuracyComparison() {
 
             <div className="flex items-center space-x-3 mb-4">
               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
-                m.isPrimary ? 'bg-brand-700 text-white' : 'bg-slate-100 text-slate-600'
+                m.isPrimary ? 'bg-brand-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
               }`}>
                 <Cpu className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">{m.name}</h3>
-                <p className="text-xs font-medium text-slate-500">{m.architecture}</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">{m.name}</h3>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{m.architecture}</p>
               </div>
             </div>
 
             {/* Core Metrics */}
             <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="p-3 rounded-2xl bg-white border border-slate-100 shadow-sm">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Overall Accuracy</p>
-                <p className="text-2xl font-black text-slate-900 mt-0.5">{m.accuracy}%</p>
+              <div className="p-3 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Overall Accuracy</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{m.accuracy}%</p>
               </div>
-              <div className="p-3 rounded-2xl bg-white border border-slate-100 shadow-sm">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Inference Speed</p>
-                <p className="text-2xl font-black text-brand-700 mt-0.5">{m.latency}</p>
+              <div className="p-3 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 shadow-sm">
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Inference Speed</p>
+                <p className="text-2xl font-black text-brand-700 dark:text-brand-400 mt-0.5">{m.latency}</p>
               </div>
             </div>
 
             {/* Metric Bars */}
             <div className="space-y-3 text-xs">
               <div>
-                <div className="flex justify-between font-semibold text-slate-700 mb-1">
+                <div className="flex justify-between font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   <span>Precision</span>
                   <span className="font-mono">{m.precision}%</span>
                 </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div className="h-full bg-brand-500 rounded-full" style={{ width: `${m.precision}%` }}></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between font-semibold text-slate-700 mb-1">
+                <div className="flex justify-between font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   <span>Recall</span>
                   <span className="font-mono">{m.recall}%</span>
                 </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div className="h-full bg-accent-500 rounded-full" style={{ width: `${m.recall}%` }}></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between font-semibold text-slate-700 mb-1">
+                <div className="flex justify-between font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   <span>F1 Score</span>
                   <span className="font-mono">{m.f1}%</span>
                 </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${m.f1}%` }}></div>
                 </div>
               </div>
@@ -153,18 +153,18 @@ export default function AccuracyComparison() {
       </div>
 
       {/* Chart Visualizations Section */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-6">
+      <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-6 transition-colors duration-200">
         <div>
-          <h3 className="text-base font-bold text-slate-900">Comparative Performance Visualizer</h3>
-          <p className="text-xs text-slate-500">Multi-axis benchmark breakdown of baseline vs MedicalNet</p>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">Comparative Performance Visualizer</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Multi-axis benchmark breakdown of baseline vs MedicalNet</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-sm">
             <EnhancedChart type="bar" title="Metric Breakdown (Baseline vs MedicalNet)" />
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-center">
             <RadarChart />
           </div>
         </div>

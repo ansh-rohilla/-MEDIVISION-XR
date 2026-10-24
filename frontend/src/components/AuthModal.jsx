@@ -47,8 +47,8 @@ export default function AuthModal({ isOpen, onClose, onLogin, onRegister, authEr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/75 backdrop-blur-sm animate-fadeIn">
+      <div className="relative w-full max-w-md bg-white dark:bg-[#0B0F19] rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors duration-200">
         
         {/* Header decoration */}
         <div className="bg-gradient-to-r from-brand-900 via-brand-700 to-brand-600 text-white p-6 relative">
@@ -75,14 +75,14 @@ export default function AuthModal({ isOpen, onClose, onLogin, onRegister, authEr
         </div>
 
         {/* Tab Toggle */}
-        <div className="flex border-b border-slate-100 bg-slate-50/50">
+        <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
           <button
             type="button"
             onClick={() => { setIsLogin(true); setLocalError(''); }}
             className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 ${
               isLogin 
-                ? 'border-brand-700 text-brand-700 bg-white' 
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-brand-700 dark:border-brand-400 text-brand-700 dark:text-brand-400 bg-white dark:bg-[#0B0F19]' 
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <span className="flex items-center justify-center gap-1.5">
@@ -95,8 +95,8 @@ export default function AuthModal({ isOpen, onClose, onLogin, onRegister, authEr
             onClick={() => { setIsLogin(false); setLocalError(''); }}
             className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 ${
               !isLogin 
-                ? 'border-brand-700 text-brand-700 bg-white' 
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-brand-700 dark:border-brand-400 text-brand-700 dark:text-brand-400 bg-white dark:bg-[#0B0F19]' 
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <span className="flex items-center justify-center gap-1.5">
@@ -108,14 +108,14 @@ export default function AuthModal({ isOpen, onClose, onLogin, onRegister, authEr
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {(localError || authError) && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-start gap-2">
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs font-medium flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
               <span>{localError || authError}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               Email / Radiologist ID
             </label>
             <div className="relative">
@@ -127,14 +127,14 @@ export default function AuthModal({ isOpen, onClose, onLogin, onRegister, authEr
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. demo@medivision.com"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-xs font-medium text-slate-800 placeholder-slate-400"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-xs font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               Password
             </label>
             <div className="relative">
@@ -146,13 +146,13 @@ export default function AuthModal({ isOpen, onClose, onLogin, onRegister, authEr
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-xs font-medium text-slate-800 placeholder-slate-400"
+                className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-xs font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -161,12 +161,12 @@ export default function AuthModal({ isOpen, onClose, onLogin, onRegister, authEr
 
           {isLogin && (
             <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center space-x-2 text-slate-600 cursor-pointer">
+              <label className="flex items-center space-x-2 text-slate-600 dark:text-slate-400 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded border-slate-300 text-brand-700 focus:ring-brand-500"
+                  className="rounded border-slate-300 dark:border-slate-700 text-brand-700 focus:ring-brand-500"
                 />
                 <span>Remember session</span>
               </label>

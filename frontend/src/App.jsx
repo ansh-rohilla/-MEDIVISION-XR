@@ -138,6 +138,22 @@ function App() {
   const [currentBodyPart, setCurrentBodyPart] = useState('');
   const [classification, setClassification] = useState(null);
   const [backendConnected, setBackendConnected] = useState(true);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('medivision_theme') || 'dark';
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('medivision_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   const vtkContainerRef = useRef(null);
   const baseSampleStepRef = useRef(1);
@@ -626,7 +642,7 @@ function App() {
 
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans antialiased">
+    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-[#090D16] text-slate-100' : 'bg-[#F8FAFC] text-slate-900'} flex flex-col font-sans antialiased transition-colors duration-200`}>
       
       {/* Top Navbar */}
       <Navbar
@@ -637,6 +653,8 @@ function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         backendConnected={backendConnected}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Layout Container */}
@@ -647,6 +665,7 @@ function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           hasScan={sliceUrls.length > 0}
+          theme={theme}
         />
 
         {/* Workspace Display Area */}
@@ -765,7 +784,7 @@ function App() {
       </div>
 
       {/* Platform Global Footer */}
-      <Footer activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Footer activeTab={activeTab} setActiveTab={setActiveTab} theme={theme} onToggleTheme={toggleTheme} />
 
       {/* Login & Registration Auth Modal */}
       <AuthModal

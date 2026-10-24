@@ -208,17 +208,17 @@ export default function HeroSection({ onStartUpload, onInspectSession, onNavigat
         {stats.map((st, i) => {
           const Icon = st.icon;
           return (
-            <div key={i} className="p-5 rounded-3xl bg-white border border-slate-200 shadow-card hover:shadow-card-hover transition-all duration-200 relative overflow-hidden group">
+            <div key={i} className="p-5 rounded-3xl bg-white dark:bg-[#0B0F19] border border-slate-200 dark:border-slate-800 shadow-card hover:shadow-card-hover transition-all duration-200 relative overflow-hidden group">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{st.label}</span>
-                <div className="w-8 h-8 rounded-xl bg-slate-100 group-hover:bg-brand-50 group-hover:text-brand-600 text-slate-600 flex items-center justify-center transition-colors">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{st.label}</span>
+                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-brand-50 dark:group-hover:bg-brand-950/60 group-hover:text-brand-600 dark:group-hover:text-brand-400 text-slate-600 dark:text-slate-400 flex items-center justify-center transition-colors">
                   <Icon className="w-4 h-4" />
                 </div>
               </div>
-              <p className="text-2xl font-black text-slate-900 tracking-tight">{st.value}</p>
-              <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[11px]">
-                <span className="text-slate-500 font-medium">{st.desc}</span>
-                <span className="font-bold text-emerald-600 text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">{st.trend}</span>
+              <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{st.value}</p>
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px]">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">{st.desc}</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-[10px] bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-800/60">{st.trend}</span>
               </div>
             </div>
           );
@@ -226,27 +226,27 @@ export default function HeroSection({ onStartUpload, onInspectSession, onNavigat
       </div>
 
       {/* Core Platform Capabilities Grid */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-5">
+      <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-5 transition-colors duration-200">
         <div>
-          <h3 className="text-base font-bold text-slate-900">End-to-End Diagnostic Pipeline Capabilities</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Comprehensive DICOM visualization and deep learning classification workflows</p>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">End-to-End Diagnostic Pipeline Capabilities</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Comprehensive DICOM visualization and deep learning classification workflows</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {features.map((feat, idx) => {
             const Icon = feat.icon;
             return (
-              <div key={idx} className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-3 hover:border-slate-300 transition-colors">
+              <div key={idx} className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 space-y-3 hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 text-brand-700 flex items-center justify-center shadow-xs">
+                  <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-brand-700 dark:text-brand-400 flex items-center justify-center shadow-xs">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
                     {feat.badge}
                   </span>
                 </div>
-                <h4 className="text-xs font-extrabold text-slate-900">{feat.title}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">{feat.desc}</p>
+                <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">{feat.title}</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{feat.desc}</p>
               </div>
             );
           })}
@@ -254,15 +254,15 @@ export default function HeroSection({ onStartUpload, onInspectSession, onNavigat
       </div>
 
       {/* Recent Diagnostic Sessions Table */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-card space-y-4">
+      <div className="bg-white dark:bg-[#0B0F19] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-card space-y-4 transition-colors duration-200">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-400 flex items-center justify-center">
               <Activity className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Recent Radiologic Sessions</h3>
-              <p className="text-[11px] text-slate-500">History of ingested scans and AI classification status</p>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Recent Radiologic Sessions</h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">History of ingested scans and AI classification status</p>
             </div>
           </div>
 
@@ -278,7 +278,7 @@ export default function HeroSection({ onStartUpload, onInspectSession, onNavigat
         <div className="overflow-x-auto pt-2">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-mono text-[10px] uppercase tracking-wider">
                 <th className="py-3 px-3 font-bold">Acquisition Timestamp</th>
                 <th className="py-3 px-3 font-bold">Session / Patient UID</th>
                 <th className="py-3 px-3 font-bold">Scan Series & Region</th>
@@ -288,23 +288,23 @@ export default function HeroSection({ onStartUpload, onInspectSession, onNavigat
                 <th className="py-3 px-3 font-bold text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
               {recentSessions.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
+                <tr key={row.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/60 transition-colors">
                   <td className="py-3.5 px-3">
                     <div className="flex items-center space-x-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 border border-slate-200/60 shadow-2xs">
-                        <Calendar className="w-3.5 h-3.5 text-brand-600" />
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0 border border-slate-200/60 dark:border-slate-700 shadow-2xs">
+                        <Calendar className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
                       </div>
                       <div>
                         <div className="flex items-center space-x-1.5">
-                          <span className="font-extrabold text-slate-900 text-xs">{row.date}</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200 font-medium">
+                          <span className="font-extrabold text-slate-900 dark:text-white text-xs">{row.date}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 font-medium">
                             {row.relativeTime}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-1 text-[10px] font-mono text-slate-400 mt-0.5">
-                          <Clock className="w-2.5 h-2.5 text-slate-400" />
+                        <div className="flex items-center space-x-1 text-[10px] font-mono text-slate-400 dark:text-slate-500 mt-0.5">
+                          <Clock className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />
                           <span>{row.time}</span>
                         </div>
                       </div>
@@ -312,37 +312,37 @@ export default function HeroSection({ onStartUpload, onInspectSession, onNavigat
                   </td>
                   <td className="py-3.5 px-3">
                     <div className="space-y-0.5">
-                      <span className="font-mono font-bold text-brand-700 text-xs">{row.id.slice(0, 8)}...</span>
-                      <div className="flex items-center space-x-1 text-[10px] text-slate-400 font-medium">
-                        <UserCheck className="w-3 h-3 text-slate-400" />
+                      <span className="font-mono font-bold text-brand-700 dark:text-brand-400 text-xs">{row.id.slice(0, 8)}...</span>
+                      <div className="flex items-center space-x-1 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                        <UserCheck className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                         <span>{row.patientId}</span>
                       </div>
                     </div>
                   </td>
                   <td className="py-3.5 px-3">
                     <div>
-                      <p className="font-bold text-slate-900 text-xs">{row.body}</p>
-                      <p className="text-[10px] font-medium text-slate-500 mt-0.5">{row.region}</p>
+                      <p className="font-bold text-slate-900 dark:text-slate-100 text-xs">{row.body}</p>
+                      <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">{row.region}</p>
                     </div>
                   </td>
                   <td className="py-3.5 px-3">
                     <div className="space-y-1">
                       <div className="flex items-center space-x-1.5">
-                        <span className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-700 text-[10px] border border-slate-200">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono font-bold text-slate-700 dark:text-slate-300 text-[10px] border border-slate-200 dark:border-slate-700">
                           {row.modality}
                         </span>
-                        <span className="font-mono font-medium text-slate-600 text-[11px]">{row.slices} frames</span>
+                        <span className="font-mono font-medium text-slate-600 dark:text-slate-400 text-[11px]">{row.slices} frames</span>
                       </div>
-                      <p className="text-[10px] font-mono text-slate-400 pl-0.5">Slice: {row.thickness || '0.75 mm'}</p>
+                      <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500 pl-0.5">Slice: {row.thickness || '0.75 mm'}</p>
                     </div>
                   </td>
                   <td className="py-3.5 px-3">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border inline-flex items-center gap-1.5 ${
                       row.risk === 'none'
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60' 
                         : row.risk === 'medium'
-                        ? 'bg-amber-50 text-amber-700 border-amber-200'
-                        : 'bg-rose-50 text-rose-700 border-rose-200'
+                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60'
+                        : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60'
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${
                         row.risk === 'none' ? 'bg-emerald-500' : row.risk === 'medium' ? 'bg-amber-500' : 'bg-rose-500 animate-pulse'
@@ -352,17 +352,17 @@ export default function HeroSection({ onStartUpload, onInspectSession, onNavigat
                   </td>
                   <td className="py-3.5 px-3">
                     <div className="space-y-0.5">
-                      <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
+                      <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700 dark:text-slate-300">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         {row.status}
                       </span>
-                      <p className="text-[10px] font-mono text-slate-400 pl-3.5">PACS Synced • {row.fileSize}</p>
+                      <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500 pl-3.5">PACS Synced • {row.fileSize}</p>
                     </div>
                   </td>
                   <td className="py-3.5 px-3 text-right">
                     <button
                       onClick={() => onInspectSession ? onInspectSession(row) : onStartUpload()}
-                      className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-brand-700 text-white text-[11px] font-bold transition-all shadow-xs inline-flex items-center space-x-1"
+                      className="px-3.5 py-1.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-brand-700 dark:hover:bg-brand-600 text-white text-[11px] font-bold transition-all shadow-xs inline-flex items-center space-x-1 dark:border dark:border-slate-700"
                     >
                       <span>Inspect 3D</span>
                       <ChevronRight className="w-3 h-3" />
