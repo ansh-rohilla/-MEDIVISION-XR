@@ -16,8 +16,11 @@ import {
   Target,
   CheckCircle2,
   Clock,
+  Calendar,
   ChevronRight,
-  Database
+  Database,
+  HardDrive,
+  UserCheck
 } from 'lucide-react';
 
 export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }) {
@@ -110,11 +113,107 @@ export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }
     },
   ];
 
-  const recentSessions = [
-    { id: '3cb8fa29-0eed-4616-a3bf-75771bf476b1', body: 'Chest CT Volumetric Series', slices: 195, modality: 'CT', date: '2 mins ago', finding: 'Pneumonia / Nodule (94.8%)', status: 'Analysis Complete', risk: 'high' },
-    { id: 'bea0052e-31c4-463e-a490-c291ae644094', body: 'Abdominal Viscera CT', slices: 120, modality: 'CT', date: '14 mins ago', finding: 'Normal Organ Anatomy', status: 'Clear', risk: 'none' },
-    { id: '1116bc40-cb9c-4980-b5ce-2630c5dddc98', body: 'Thoracic Scan (Contrast)', slices: 210, modality: 'CT', date: '35 mins ago', finding: 'Infiltration Detected (88.2%)', status: 'Follow-up Recommended', risk: 'medium' },
+  const DEFAULT_SESSIONS = [
+    { 
+      id: '3cb8fa29-0eed-4616-a3bf-75771bf476b1', 
+      patientId: 'PT-98042 (Anon)',
+      body: 'Chest CT Volumetric Series', 
+      region: 'Thorax / Pulmonary',
+      slices: 195, 
+      thickness: '0.75 mm',
+      modality: 'CT', 
+      date: 'Oct 24, 2026', 
+      time: '14:48:12 IST',
+      relativeTime: '2 mins ago',
+      finding: 'Pneumonia / Nodule (94.8%)', 
+      status: 'Analysis Complete', 
+      risk: 'high',
+      fileSize: '24.5 MB'
+    },
+    { 
+      id: 'bea0052e-31c4-463e-a490-c291ae644094', 
+      patientId: 'PT-47219 (Anon)',
+      body: 'Abdominal Viscera CT', 
+      region: 'Abdomen / Hepatic',
+      slices: 120, 
+      thickness: '1.25 mm',
+      modality: 'CT', 
+      date: 'Oct 24, 2026', 
+      time: '14:35:50 IST',
+      relativeTime: '14 mins ago',
+      finding: 'Normal Organ Anatomy', 
+      status: 'Clear', 
+      risk: 'none',
+      fileSize: '18.2 MB'
+    },
+    { 
+      id: '1116bc40-cb9c-4980-b5ce-2630c5dddc98', 
+      patientId: 'PT-63108 (Anon)',
+      body: 'Thoracic Scan (Contrast)', 
+      region: 'Thorax / Vascular',
+      slices: 210, 
+      thickness: '0.625 mm',
+      modality: 'CT', 
+      date: 'Oct 24, 2026', 
+      time: '14:12:05 IST',
+      relativeTime: '35 mins ago',
+      finding: 'Infiltration Detected (88.2%)', 
+      status: 'Follow-up Recommended', 
+      risk: 'medium',
+      fileSize: '31.4 MB'
+    },
+    {
+      id: '7f92e4a1-8d23-41bb-b501-447a98c0921f',
+      patientId: 'PT-81045 (Anon)',
+      body: 'Full Body Multi-Organ CT',
+      region: 'Systemic / Torso',
+      slices: 340,
+      thickness: '1.00 mm',
+      modality: 'CT',
+      date: 'Oct 24, 2026',
+      time: '13:50:22 IST',
+      relativeTime: '1 hour ago',
+      finding: 'Multi-Organ Mapped (96.2%)',
+      status: 'Analysis Complete',
+      risk: 'none',
+      fileSize: '48.6 MB'
+    },
+    {
+      id: '992a18f4-2104-45e3-99b2-38b10f227001',
+      patientId: 'PT-10394 (Anon)',
+      body: 'Brain Cranial MRI Scan',
+      region: 'Cerebral / Neuro',
+      slices: 210,
+      thickness: '0.50 mm',
+      modality: 'MRI',
+      date: 'Oct 24, 2026',
+      time: '12:15:40 IST',
+      relativeTime: '2 hours ago',
+      finding: 'Cortical Ventricular Surface',
+      status: 'Analysis Complete',
+      risk: 'none',
+      fileSize: '32.1 MB'
+    }
   ];
+
+  const recentSessions = React.useMemo(() => {
+    try {
+      const stored = localStorage.getItem('radiology_sessions_history');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const combined = [...parsed];
+          DEFAULT_SESSIONS.forEach(def => {
+            if (!combined.some(c => c.id === def.id)) {
+              combined.push(def);
+            }
+          });
+          return combined;
+        }
+      }
+    } catch (e) {}
+    return DEFAULT_SESSIONS;
+  }, []);
 
   return (
     <div className="space-y-8 py-2">
@@ -305,10 +404,10 @@ export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
-                <th className="py-3 px-3 font-bold">Session ID</th>
-                <th className="py-3 px-3 font-bold">Scan Series Name</th>
-                <th className="py-3 px-3 font-bold">Modality</th>
-                <th className="py-3 px-3 font-bold">Frame Count</th>
+                <th className="py-3 px-3 font-bold">Acquisition Timestamp</th>
+                <th className="py-3 px-3 font-bold">Session / Patient UID</th>
+                <th className="py-3 px-3 font-bold">Scan Series & Region</th>
+                <th className="py-3 px-3 font-bold">Modality & Specs</th>
                 <th className="py-3 px-3 font-bold">Diagnostic Finding</th>
                 <th className="py-3 px-3 font-bold">Pipeline Status</th>
                 <th className="py-3 px-3 font-bold text-right">Action</th>
@@ -317,30 +416,73 @@ export default function HeroSection({ onStartUpload, onOpenDemo, onNavigateTab }
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {recentSessions.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3.5 px-3 font-mono font-bold text-brand-700">{row.id.slice(0, 8)}...</td>
-                  <td className="py-3.5 px-3 font-bold text-slate-900">{row.body}</td>
                   <td className="py-3.5 px-3">
-                    <span className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-700 text-[10px] border border-slate-200">
-                      {row.modality}
-                    </span>
+                    <div className="flex items-center space-x-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 border border-slate-200/60 shadow-2xs">
+                        <Calendar className="w-3.5 h-3.5 text-brand-600" />
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="font-extrabold text-slate-900 text-xs">{row.date}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 border border-slate-200 font-medium">
+                            {row.relativeTime}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1 text-[10px] font-mono text-slate-400 mt-0.5">
+                          <Clock className="w-2.5 h-2.5 text-slate-400" />
+                          <span>{row.time}</span>
+                        </div>
+                      </div>
+                    </div>
                   </td>
-                  <td className="py-3.5 px-3 font-mono font-medium text-slate-600">{row.slices} frames</td>
                   <td className="py-3.5 px-3">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                    <div className="space-y-0.5">
+                      <span className="font-mono font-bold text-brand-700 text-xs">{row.id.slice(0, 8)}...</span>
+                      <div className="flex items-center space-x-1 text-[10px] text-slate-400 font-medium">
+                        <UserCheck className="w-3 h-3 text-slate-400" />
+                        <span>{row.patientId}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-3">
+                    <div>
+                      <p className="font-bold text-slate-900 text-xs">{row.body}</p>
+                      <p className="text-[10px] font-medium text-slate-500 mt-0.5">{row.region}</p>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-1.5">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-700 text-[10px] border border-slate-200">
+                          {row.modality}
+                        </span>
+                        <span className="font-mono font-medium text-slate-600 text-[11px]">{row.slices} frames</span>
+                      </div>
+                      <p className="text-[10px] font-mono text-slate-400 pl-0.5">Slice: {row.thickness || '0.75 mm'}</p>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-3">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border inline-flex items-center gap-1.5 ${
                       row.risk === 'none'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                         : row.risk === 'medium'
                         ? 'bg-amber-50 text-amber-700 border-amber-200'
                         : 'bg-rose-50 text-rose-700 border-rose-200'
                     }`}>
-                      {row.finding}
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        row.risk === 'none' ? 'bg-emerald-500' : row.risk === 'medium' ? 'bg-amber-500' : 'bg-rose-500 animate-pulse'
+                      }`} />
+                      <span>{row.finding}</span>
                     </span>
                   </td>
                   <td className="py-3.5 px-3">
-                    <span className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                      {row.status}
-                    </span>
+                    <div className="space-y-0.5">
+                      <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {row.status}
+                      </span>
+                      <p className="text-[10px] font-mono text-slate-400 pl-3.5">PACS Synced • {row.fileSize}</p>
+                    </div>
                   </td>
                   <td className="py-3.5 px-3 text-right">
                     <button

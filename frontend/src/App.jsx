@@ -519,6 +519,26 @@ function App() {
         try {
           const classificationResult = await api.classifyScan(result.session_id, detectedBodyPart);
           setClassification(classificationResult.classification);
+          
+          // Save session to history with current timestamp
+          const newSessionRecord = {
+            id: result.session_id,
+            patientId: `PT-${result.session_id.slice(0, 5).toUpperCase()} (Anon)`,
+            body: `${(detectedBodyPart || 'Diagnostic').toUpperCase()} Series`,
+            region: detectedBodyPart === 'brain' ? 'Cerebral / Neuro' : detectedBodyPart === 'abdomen' ? 'Abdomen / Viscera' : detectedBodyPart === 'fullbody' ? 'Systemic / Torso' : 'Thorax / Pulmonary',
+            slices: result.slice_urls?.length || 195,
+            thickness: '0.75 mm',
+            modality: 'CT',
+            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            relativeTime: 'Just now',
+            finding: classificationResult.classification?.diagnosis || 'Analysis Complete',
+            status: 'Analysis Complete',
+            risk: 'none',
+            fileSize: `${Math.round((fileList.length || 1) * 0.15 * 10) / 10 || 22.4} MB`
+          };
+          const prev = JSON.parse(localStorage.getItem('radiology_sessions_history') || '[]');
+          localStorage.setItem('radiology_sessions_history', JSON.stringify([newSessionRecord, ...prev.filter(s => s.id !== newSessionRecord.id)].slice(0, 10)));
         } catch (e) {
           console.error('Classification failed:', e);
           setClassification(null);
