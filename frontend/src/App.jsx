@@ -665,6 +665,8 @@ function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           hasScan={sliceUrls.length > 0}
+          sessionId={sessionId}
+          sliceCount={sliceUrls.length}
           theme={theme}
         />
 

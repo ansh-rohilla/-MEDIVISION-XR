@@ -43,7 +43,7 @@ export default function Navbar({
     {
       id: 1,
       title: 'Pulmonary Nodule Classified (94.8%)',
-      desc: 'MedicalNet 3D ResNet identified high suspicion nodule in Series #3cb8fa29.',
+      desc: 'MedicalNet 3D ResNet identified nodule target in pulmonary series.',
       time: '2 mins ago',
       unread: true,
       type: 'high',
@@ -53,7 +53,7 @@ export default function Navbar({
     {
       id: 2,
       title: 'PACS DICOM Gateway Ingestion Synced',
-      desc: '195 DICOM frames anonymized under HIPAA guidelines.',
+      desc: 'Multi-slice DICOM series anonymized under HIPAA guidelines.',
       time: '12 mins ago',
       unread: true,
       type: 'info',
